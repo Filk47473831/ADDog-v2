@@ -1,5 +1,11 @@
 package.json
 package-lock.json
+debug.log
+activity.log
+nssm.exe
+settings/users.data
+settings/templates.data
+settings/settings.data
 git/bin/bash.exe
 git/bin/git.exe
 git/bin/sh.exe
@@ -15470,9 +15476,3 @@ nodejs/node_modules/npm/scripts/update-authors.sh
 nodejs/node_modules/npm/scripts/update-dist-tags.js
 nodejs/node_modules/npm/tap-snapshots/test-tap-fund.js-TAP.test.js
 nodejs/node_modules/npm/tap-snapshots/test-tap-repo.js-TAP.test.js
-settings/users.data
-settings/templates.data
-settings/settings.data
-debug.log
-activity.log
-nssm.exe
