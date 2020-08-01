@@ -1,0 +1,295 @@
+  <main>
+    <div class="container-fluid">
+      <h3 class="mt-4">Settings</h3>
+      <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item"><a href="/">Dashboard</a></li>
+        <li class="breadcrumb-item active">Settings</li>
+      </ol>
+      <div class="col-sm-12 col-md-10 col-lg-8 col-xl-6">
+      <div class="card shadow-lg border-0 rounded-lg mb-2">
+          <div class="card-body">
+              <p id="updateStatus">Current Version 2.1</p>
+              <button id="updateApp" onclick="updateApp()" type="button" class="btn btn-success">Check for updates</button>
+          </div>
+        </div>
+      </div>
+      <div class="col-sm-12 col-md-10 col-lg-8 col-xl-6">
+      <div class="card shadow-lg border-0 rounded-lg mt-3 mb-2">
+          <div class="card-body">
+              <p>Remote Management</p>
+              <form action="editsettings" method="POST">
+                  <input disabled type="submit" name="enableRM" class="btn btn-info" href="#" value="Enable">
+              </form>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-sm-12 col-md-10 col-lg-8 col-xl-6">
+      <div class="card shadow-lg border-0 rounded-lg mt-3 mb-1">
+          <div class="card-body">
+              <p>Authorised Users</p>
+              <div id="authorisedUsers"></div>
+            <div class="mt-3">
+              <button type="button" class="btn btn-primary btn-sm" data-toggle="modal" data-target="#addAuthorisedAdminModal">
+                Add Authorised User
+              </button>
+              <button hidden id="clearAuthorisedUsersBtn" onclick="clearAuthorisedAdmins()" type="button" class="btn btn-danger btn-sm">
+                Clear All Authorised Users
+              </button>
+            </div>
+        </div>
+      </div>
+    </div>
+
+
+      <!-- <div class="col-sm-12 col-md-10 col-lg-8 col-xl-6">
+      <div class="card shadow-lg border-0 rounded-lg mt-3 mb-2">
+          <div class="card-body">
+                  <div class="form-group">
+                    <label class="small mb-1" for="inputDC">Domain Controller</label>
+                    <input required class="form-control" id="inputDC" type="text" placeholder="e.g. A-DC" value=""/>
+                    <div class="invalid-feedback"></div>
+                  </div>
+                  <div class="form-group">
+                    <label class="small mb-1" for="inputDomain">Domain FQDN</label>
+                    <input required class="form-control" id="inputDomain" type="text" placeholder="e.g. ASDOMAIN.local" value=""/>
+                    <div class="invalid-feedback"></div>
+                  </div>
+                  <div class="form-group">
+                    <label class="small mb-1" for="inputOU">Base DN</label>
+                    <input required class="form-control" id="inputOU" type="text" placeholder="e.g. DC=ASDOMAIN,DC=local" value="">
+                    <div class="invalid-feedback"></div>
+                  </div>
+                  <div class="form-group">
+                    <label class="small mb-1" for="inputPWMinLength">Password Minimum Length</label>
+                    <input disabled class="form-control" id="inputPWMinLength" type="number" min="0" placeholder="e.g. 10" value=""/>
+                  </div>
+                  <div class="form-group">
+                    <label class="small mb-1" for="inputLoginMessage">Custom Login Message</label>
+                    <input disabled class="form-control" id="inputLoginMessage" type="text" placeholder="e.g. Please login with your network credentials" value=""/>
+                  </div>
+                  <div class="form-group">
+                    <label class="small mb-1" for="inputPrintServer">Print Server</label>
+                    <input disabled class="form-control" id="inputPrintServer" type="text" placeholder="AD Dog Installed Location" value=""/>
+                  </div>
+                  <div class="form-group">
+                    <label class="small mb-1" for="inputADSyncServer">AD Sync Server</label>
+                    <input disabled class="form-control" id="inputADSyncServer" type="text" placeholder="AD Dog Installed Location" value=""/>
+                  </div>
+                  <div class="form-group">
+                    <label class="small mb-1" for="inputUsername">Admin Account</label>
+                    <input disabled required class="form-control" id="inputUsername" type="text" placeholder="e.g. Administrator" value=""/>
+                    <div class="invalid-feedback"></div>
+                  </div>
+                  <div class="form-group">
+                    <input disabled required class="form-control" id="inputPassword" type="password" placeholder="Confirm Password" value="****************"/>
+                    <div class="invalid-feedback"></div>
+                  </div>
+                  <div class="form-group d-flex align-items-center justify-content-between mt-4 mb-0">
+                    <input disabled onclick="" id="saveSettingsBtn" type="button" class="btn btn-primary" href="#" value="Save">&nbsp;&nbsp;
+                    <div id="invalid-feedback" class="invalid-feedback"></div>
+                  </div>
+            </div>
+          </div>
+        </div> -->
+
+      </div>
+  </main>
+
+  <div id="addAuthorisedAdminModal" class="modal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Add Authorised User</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <p class="small unselectable mt-3">Authorised Users can login to AD Dog and manage other users. The authorised user will only be able to update, add and remove users that exist within the selected organizational units.</p>
+          <label class="small mb-1" for="inputAuthorisedAdminUsername">Username</label>
+          <input class="form-control" id="inputAuthorisedAdminUsername" type="text" placeholder="e.g. jsmith" value=""/>
+        </div>
+        <div class="form-group">
+          <label class="small mb-1" for="authUserOUTree">User Search OU</label>
+          <div id="authUserOUTree">
+          </div>
+          <textarea readonly class="mt-3 mb-2 form-control" id="inputAuthorisedAdminSearchOUs" type="text" rows="5" placeholder="Select Search OU's"></textarea>
+          <button type="button" class="btn btn-warning btn-sm" onclick="document.getElementById('inputAuthorisedAdminSearchOUs').value = ''">Clear</button>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <div id="invalid-feedback-authAdmins" class="invalid-feedback"></div>
+        <button id="updateAuthorisedAdminsSaveBtn" onclick="updateAuthorisedAdmins()" type="button" class="btn btn-primary">Save</button>
+        <button type="button" class="btn btn-danger" onclick="hideResetModal()">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="js/apiquery.js"></script>
+<script>
+
+const api = new API();
+var settings = "";
+var invalidFeedbackMsg = document.getElementById("invalid-feedback");
+var saveSettingsBtn = document.getElementById("saveSettingsBtn");
+// var inputDC = document.getElementById("inputDC");
+// var inputDomain = document.getElementById("inputDomain");
+// var inputOU = document.getElementById("inputOU");
+var inputUsername = document.getElementById("inputUsername");
+
+
+api.readSettings(function(result){
+  settings = JSON.parse(result)
+  // document.getElementById("inputDC").value = settings.Settings.server;
+  // document.getElementById("inputDomain").value = settings.Settings.domainFQDN;
+  // document.getElementById("inputOU").value = settings.Settings.baseDn;
+  document.getElementById("inputUsername").value = settings.Settings.domainUsername;
+  document.getElementById("inputPWMinLength").value = settings.Settings.passwordMinLength;
+  document.getElementById("inputLoginMessage").value = settings.Settings.loginMsg;
+  document.getElementById("inputPrintServer").value = settings.Settings.printServer;
+  document.getElementById("inputADSyncServer").value = settings.Settings.adSyncServer;
+
+})
+
+function saveSettings() {
+
+      saveSettingsBtn.setAttribute("disabled","disabled");
+
+      if(inputUsername.value == "") {
+
+      // if(inputDC.value == "") {
+      //   inputDC.classList.add("is-invalid"); saveSettingsBtn.classList.add("is-invalid"); invalidFeedbackMsg.innerHTML = "Missing Fields"; } else { inputDC.classList.remove("is-invalid"); }
+      // if(inputDomain.value == "") {
+      //     inputDomain.classList.add("is-invalid"); saveSettingsBtn.classList.add("is-invalid"); invalidFeedbackMsg.innerHTML = "Missing Fields"; } else { inputDomain.classList.remove("is-invalid"); }
+      // if(inputBaseDN.value == "") {
+      //         inputBaseDN.classList.add("is-invalid"); saveSettingsBtn.classList.add("is-invalid"); invalidFeedbackMsg.innerHTML = "Missing Fields"; } else { inputBaseDN.classList.remove("is-invalid"); }
+      if(inputUsername.value == "") {
+          inputUsername.classList.add("is-invalid"); saveSettingsBtn.classList.add("is-invalid"); invalidFeedbackMsg.innerHTML = "Missing Fields"; } else { inputUsername.classList.remove("is-invalid"); }
+
+      saveSettingsBtn.removeAttribute("disabled");
+
+    } else {
+
+    // settings.Settings.server = document.getElementById("inputDC").value;
+    // settings.Settings.domainFQDN = document.getElementById("inputDomain").value;
+    // settings.Settings.baseDn = document.getElementById("inputBaseDN").value;
+    settings.Settings.domainUsername = document.getElementById("inputUsername").value;
+    settings.Settings.domainPassword = document.getElementById("inputPassword").value;
+    settings.Settings.passwordMinLength = document.getElementById("inputPWMinLength").value;
+    settings.Settings.loginMsg = document.getElementById("inputLoginMessage").value;
+    settings.Settings.printServer = document.getElementById("inputPrintServer").value;
+    settings.Settings.adSyncServer = document.getElementById("inputADSyncServer").value;
+
+    api.writeSettings(settings, function(result){
+      location.reload();
+    })
+
+  }
+
+}
+
+function readAuthorisedAdmins(){
+  api.readLoginUsers(function(result){
+    if(result == "{}") { document.getElementById("authorisedUsers").innerHTML = "<small>None</small>"; } else {
+    document.getElementById("clearAuthorisedUsersBtn").removeAttribute("hidden");
+    result = JSON.parse(result)
+    var response = `<ul class="small list-group list-group-flush">`
+    for (var key of Object.keys(result)) {
+      response += `<li style="border-style: none!important;padding: 0px!important" class="list-group-item">${result[key].username}`
+      response += `<ul class="list-group list-group-flush">`
+      for (var key2 of Object.keys(result[key].distinguishedNames)) {
+        response += `<li style="padding-left: 10px;padding-top: 0px; padding-bottom: 0px; border-style: none!important" class="list-group-item"><small>${result[key].distinguishedNames[key2]}</small></li>`
+      }
+      response += `</ul></li>`
+    }
+    response += `</ul>`
+    document.getElementById("authorisedUsers").innerHTML = response;
+  }
+  })
+}
+
+readAuthorisedAdmins();
+
+function updateAuthorisedAdmins(){
+  var username = document.getElementById("inputAuthorisedAdminUsername").value;
+  var distinguishedNames = document.getElementById("inputAuthorisedAdminSearchOUs").value;
+
+  var distinguishedNamesSplit = distinguishedNames.split("\n");
+  if(distinguishedNames === distinguishedNamesSplit[0]) { distinguishedNamesSplit = [distinguishedNames] }
+  distinguishedNames = JSON.stringify(distinguishedNamesSplit)
+
+  if(username !== "" && distinguishedNames !== "") {
+
+    document.getElementById("updateAuthorisedAdminsSaveBtn").style = "width:56px";
+    document.getElementById("updateAuthorisedAdminsSaveBtn").innerHTML = '<i style="font-size:1.2rem;margin-top:3px" class="fas fa-circle-notch fa-spin"></i>';
+
+    api.addLoginUser(username, distinguishedNames, function(result){
+      if(result == "Success") {
+        location.reload()
+        document.getElementById("inputAuthorisedAdminSearchOUs").value = "";
+        document.getElementById("inputAuthorisedAdminUsername").value = "";
+      } else {
+        document.getElementById("updateAuthorisedAdminsSaveBtn").style = "";
+        document.getElementById("updateAuthorisedAdminsSaveBtn").innerHTML = 'Save';
+        if(document.getElementById("inputAuthorisedAdminSearchOUs").value == "") {
+          document.getElementById("inputAuthorisedAdminSearchOUs").classList.add("is-invalid"); } else { document.getElementById("inputAuthorisedAdminSearchOUs").classList.remove("is-invalid"); }
+        if(document.getElementById("inputAuthorisedAdminUsername").value == "") {
+          document.getElementById("inputAuthorisedAdminUsername").classList.add("is-invalid"); } else { document.getElementById("inputAuthorisedAdminUsername").classList.remove("is-invalid"); }
+      }
+    })
+
+  } else {
+
+    if(document.getElementById("inputAuthorisedAdminSearchOUs").value == "") {
+      document.getElementById("inputAuthorisedAdminSearchOUs").classList.add("is-invalid"); } else { document.getElementById("inputAuthorisedAdminSearchOUs").classList.remove("is-invalid"); }
+    if(document.getElementById("inputAuthorisedAdminUsername").value == "") {
+      document.getElementById("inputAuthorisedAdminUsername").classList.add("is-invalid"); } else { document.getElementById("inputAuthorisedAdminUsername").classList.remove("is-invalid"); }
+  }
+}
+
+function clearAuthorisedAdmins(){
+  api.addLoginUser(null, null, function(result){ location.reload() })
+}
+
+function hideResetModal() {
+  $('#addAuthorisedAdminModal').modal('hide');
+  document.getElementById("updateAuthorisedAdminsSaveBtn").style = "";
+  document.getElementById("updateAuthorisedAdminsSaveBtn").innerHTML = 'Save';
+  document.getElementById("inputAuthorisedAdminUsername").value = "";
+  document.getElementById("inputAuthorisedAdminSearchOUs").value = "";
+}
+
+api.ouTree(function(outree){
+  var ouTreeList = `<ul><li class="jstree-open">Organizational Units<ul>`;
+  outree.forEach(element => ouTreeList += `<li value="${element.dn}">${element.name}</li>`)
+  ouTreeList = ouTreeList + `</ul></li></ul>`;
+  $('#authUserOUTree').html(ouTreeList)
+  $('#authUserOUTree').jstree()
+  $('#authUserOUTree').on('changed.jstree', function (e, data) {
+      var i, j, r = [];
+      for(i = 0, j = data.selected.length; i < j; i++) {
+        r.push(data.instance.get_node(data.selected[i]).li_attr.value);
+      }
+      if(document.getElementById("inputAuthorisedAdminSearchOUs").value == "") { document.getElementById("inputAuthorisedAdminSearchOUs").value = r.join(', '); } else {
+      document.getElementById("inputAuthorisedAdminSearchOUs").value = document.getElementById("inputAuthorisedAdminSearchOUs").value + "\r\n" + r.join(', '); }
+  })
+})
+
+function updateApp(){
+
+  document.getElementById("updateApp").innerHTML = 'Checking for updates&nbsp;<i style="transform: translate(0px, -4px);" class="fas fa-circle-notch fa-spin"></i>';
+  document.getElementById("updateApp").setAttribute("onclick", "");
+  document.getElementById("updateApp").setAttribute("disabled", "disabled");
+
+  api.updateApp(function(result){
+      window.scrollTo(0,0);
+      if(result.includes('Already up to date.')) { document.getElementById("updateStatus").innerHTML = "No new updates available"; } else { result = result.substring(100); document.getElementById("updateStatus").innerHTML = result; }
+      document.getElementById("updateApp").innerHTML = 'Check for updates';
+      document.getElementById("updateApp").setAttribute("onclick", "updateApp()");
+      document.getElementById("updateApp").removeAttribute("disabled");
+  })
+
+}
+</script>

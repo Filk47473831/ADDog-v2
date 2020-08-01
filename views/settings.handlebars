@@ -1,0 +1,54 @@
+<main>
+    <div class="container">
+        <div class="row justify-content-center login-panel">
+            <div class="col-lg-5">
+                <div class="card shadow-lg border-0 rounded-lg mt-2">
+                    <div class="card-header d-flex justify-content-center">
+                      <img style="max-width: 140px; max-height: 110px" src="img/dog.png">
+                    </div>
+                    <div class="card-body">
+                      <form action="/settings" method="post">
+                        <div class="form-group">
+                          <label class="small mb-1" for="inputDC">Domain Controller</label>
+                          <input autofocus required name="inputDC" class="form-control" id="inputDC" type="text" placeholder="e.g. A-DC" value=""/>
+                        </div>
+                        <div class="form-group">
+                          <label class="small mb-1" for="inputDomain">Domain FQDN</label>
+                          <input required name="inputDomain" class="form-control" id="inputDomain" type="text" placeholder="e.g. ASDOMAIN.local" value=""/>
+                        </div>
+                        <div class="form-group">
+                          <label class="small mb-1" for="inputOU">Base DN</label>
+                          <input required name="inputOU" class="form-control" id="inputOU" type="text" placeholder="e.g. DC=ASDOMAIN,DC=LOCAL" value=""/>
+                        </div>
+                        <div class="form-group">
+                          <label class="small mb-1" for="inputUsername">Admin Account</label>
+                          <input required name="inputUsername" class="form-control" id="inputUsername" type="text" placeholder="e.g. Administrator" value=""/>
+                        </div>
+                        <div class="form-group">
+                          <input required name="inputPassword" class="form-control" id="inputPassword" type="password" placeholder="Confirm Password" value=""/>
+                        </div>
+                        <div class="form-group d-flex align-items-center justify-content-between mt-4 mb-0">
+                          <input id="saveSettingsBtn" type="submit" class="btn btn-primary" href="#" value="Save">&nbsp;&nbsp;
+                          <div id="invalid-feedback" class="invalid-feedback"></div>
+                        </div>
+                      </form>
+                    </div>
+                    <div class="card-footer text-center">
+                        <div class="small">Please update your settings</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+<script>
+ var invalidFeedbackMsg = document.getElementById("invalid-feedback");
+ var saveSettingsBtn = document.getElementById("saveSettingsBtn");
+
+ console.log(window.location.href);
+
+if(window.location.href.endsWith("failed")) {
+  saveSettingsBtn.classList.add("is-invalid");
+  invalidFeedbackMsg.innerHTML = "Connection Error";
+ }
+</script>

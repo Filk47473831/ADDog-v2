@@ -1,0 +1,470 @@
+<main>
+    <div class="container-fluid">
+      <h3 class="mt-4">Add User</h3>
+      <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item"><a href="/">Dashboard</a></li>
+        <li class="breadcrumb-item active">Add User</li>
+      </ol>
+      <div class="col-sm-12 col-md-10 col-lg-8 col-xl-6">
+        <div class="card shadow-lg border-0 rounded-lg mt-2">
+          <div id="card-body" class="card-body">
+               <h6 class="mb-3">Add a new user to the network</h6>
+                <div class="form-group">
+                    <label class="small mb-1" for="inputUserTemplate">Select User Template</label>
+                    <select id="inputUserTemplate" class="form-control"></select>
+                </div>
+                <div class="form-group">
+                  <label class="small mb-1" for="inputFirstName">First Name</label>
+                  <input autofocus tabindex="1" autocomplete="off" class="form-control" id="inputFirstName" type="text" placeholder="John" value=""/>
+                  <div class="invalid-feedback"></div>
+                </div>
+                <div class="form-group">
+                  <label class="small mb-1" for="inputLastName">Last Name</label>
+                  <input tabindex="2" autocomplete="off" class="form-control" id="inputLastName" type="text" placeholder="Smith" value=""/>
+                  <div class="invalid-feedback"></div>
+                </div>
+                <p style="cursor:pointer" onclick="toggleAdvancedOptionsIcon()" class="small unselectable" data-toggle="collapse" href="#collapseExample" aria-expanded="false" aria-controls="collapseExample">
+                    &nbsp;<i id="advancedOptionsIcon" class="far fa-plus-square"></i>&nbsp;Advanced Options
+                </p>
+                <div class="collapse" id="collapseExample">
+                  <div class="form-group">
+                    <label class="small mb-1" for="inputUPNSuffix">UPN Suffix</label>
+                    <input autocomplete="off" class="form-control" id="inputUPNSuffix" type="text" placeholder="e.g. arunside.school" value=""/>
+                  </div>
+                  <div class="form-group">
+                    <label class="small mb-1" for="inputEmailAddress">Email Address</label>
+                    <input autocomplete="off" class="form-control" id="inputEmailAddress" type="text" placeholder="e.g. jsmith@arunside.school" value=""/>
+                  </div>
+                  <div class="form-group">
+                    <label class="small mb-1" for="inputHomeDirectory">Home Directory</label>
+                    <input autocomplete="off" class="form-control" id="inputHomeDirectory" type="text" placeholder="e.g. \\AS-DC\Staff$\%USERNAME%" value=""/>
+                  </div>
+                  <div class="form-group">
+                    <label class="small mb-1" for="inputHomeDrive">Home Drive Letter</label>
+                    <input autocomplete="off" class="form-control" id="inputHomeDrive" type="text" placeholder="e.g. U" maxlength="1" value=""/>
+                  </div>
+                  <div class="form-group">
+                    <label class="small mb-1" for="inputProfilePath">Profile Path</label>
+                    <input autocomplete="off" class="form-control" id="inputProfilePath" type="text" placeholder="e.g. \\AS-DC\Profiles$\%USERNAME%" value=""/>
+                  </div>
+                  <div class="form-group">
+                    <label class="small mb-1" for="inputScriptPath">Logon Script</label>
+                    <input autocomplete="off" class="form-control" id="inputScriptPath" type="text" placeholder="e.g. Staff.bat" value=""/>
+                  </div>
+                  <div class="form-group">
+                    <label class="small mb-1" for="inputGroupDN">Member Group Name's (1 Per Line)</label>
+                    <textarea class="form-control" id="inputGroupDN" type="text" rows="7" placeholder="e.g. Staff"></textarea>
+                  </div>
+                  <div class="form-group">
+                    <label class="small mb-1" for="ouTree">Target OU</label>
+                    <div tabindex="-1" id="ouTree"></div>
+                    <input tabindex="-1" disabled autocomplete="off" required style="border:0px" required class="form-control mt-3" id="inputUserOU" value="" placeholder="Select target OU for new user">
+                    <div class="invalid-feedback"></div>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label class="small mb-1" for="inputUser">Username</label>
+                  <input autocomplete="new-password" class="form-control" id="inputUser" type="text" placeholder="jsmith" value=""/>
+                  <div class="invalid-feedback"></div>
+                </div>
+                <div class="form-group">
+                  <label class="small mb-1" for="inputPassword">Password</label>
+                  <input tabindex="3" autocomplete="new-password" class="form-control" id="inputPassword" type="password" placeholder="Enter Password" value=""/>
+                </div>
+                <div class="form-group">
+                  <input tabindex="4" autocomplete="new-password" class="form-control" id="inputConfPassword" type="password" placeholder="Confirm Password" value=""/>
+                  <div class="invalid-feedback"></div>
+                </div>
+                <div class="form-check">
+                  <input tabindex="5" type="checkbox" class="form-check-input" id="promptNextLogin">
+                  <label class="form-check-label small unselectable" for="promptNextLogin">Prompt user to change password on next login (this may not allow the user to login if connecting remotely).</label>
+                </div>
+                <div class="form-group d-flex align-items-center justify-content-between mt-4 mb-0">
+                  <input tabindex="6" id="addUserBtn" onclick="addUser()" type="button" class="btn btn-success" href="#" value="Add User">&nbsp;&nbsp;
+                  <div id="invalid-feedback" class="invalid-feedback"></div>
+                </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+  <script src="js/apiquery.js"></script>
+  <script>
+
+  const api = new API();
+  getUserTemplates();
+  var userTemplates = "";
+
+  function isEmpty(obj) {
+    for(var key in obj) {
+        if(obj.hasOwnProperty(key))
+            return false;
+    }
+    return true;
+  }
+
+  function getTemplateData(chosenTemplate){
+
+    try {
+      var inputUPNSuffix = document.getElementById("inputUPNSuffix");
+      var inputEmailAddress = document.getElementById("inputEmailAddress");
+      var inputHomeDirectory = document.getElementById("inputHomeDirectory");
+      var inputHomeDrive = document.getElementById("inputHomeDrive");
+      var inputProfilePath = document.getElementById("inputProfilePath");
+      var inputScriptPath = document.getElementById("inputScriptPath");
+      var inputGroupDN = document.getElementById("inputGroupDN");
+      var inputUserOU = document.getElementById("inputUserOU");
+
+      inputUPNSuffix.value = userTemplates[chosenTemplate].upnSuffix;
+      inputEmailAddress.value = userTemplates[chosenTemplate].emailAddress;
+      inputHomeDirectory.value = userTemplates[chosenTemplate].homeDirectory;
+      inputHomeDrive.value = userTemplates[chosenTemplate].homeDrive;
+      inputProfilePath.value = userTemplates[chosenTemplate].profilePath;
+      inputScriptPath.value = userTemplates[chosenTemplate].scriptPath;
+      inputGroupDN.value = userTemplates[chosenTemplate].groupDN;
+      inputUserOU.value = userTemplates[chosenTemplate].userOU;
+
+      usernameFormat(userTemplates[chosenTemplate].usernameFormat);
+    }
+    catch (err) { }
+
+  }
+
+  function getUserTemplates() {
+    api.getUserTemplates(function(result) {
+        if(result.startsWith("Error")) { window.location.href = "addtemplate"; } else {
+        if(isEmpty(result)) { window.location.href = "addtemplate"; }
+        result = JSON.parse(result)
+        userTemplates = result;
+        for (const key of Object.keys(result)) {
+            document.getElementById("inputUserTemplate").innerHTML += "<option value='" + result[key].userTemplateName + "'>" + result[key].userTemplateName + "</option>";
+        }
+        getTemplateData(Object.keys(userTemplates)[0])
+        }
+    })
+  }
+
+  api.ouTree(function(outree){
+    var ouTreeList = `<ul><li class="jstree-open">Organizational Units<ul>`;
+    outree.forEach(element => ouTreeList += `<li value="${element.dn}">${element.name}</li>`)
+    ouTreeList = ouTreeList + `</ul></li></ul>`;
+    $('#ouTree').html(ouTreeList)
+    $('#ouTree').jstree()
+    $('#ouTree').on('changed.jstree', function (e, data) {
+        var i, j, r = [];
+        for(i = 0, j = data.selected.length; i < j; i++) {
+          r.push(data.instance.get_node(data.selected[i]).li_attr.value);
+        }
+        document.getElementById("inputUserOU").value = r.join(', ');
+    })
+  })
+
+  var cardBody = document.getElementById("card-body");
+
+  document.getElementById("inputConfPassword").addEventListener('keyup', function(event) {
+      if(event.key == "Enter") { addUser(); }
+  });
+
+  function addUser() {
+
+    var invalidFeedbackMsg = document.getElementById("invalid-feedback");
+    var addUserBtn = document.getElementById("addUserBtn");
+    var inputFirstName = document.getElementById("inputFirstName");
+    var inputLastName = document.getElementById("inputLastName");
+    var actualName = inputFirstName.value + " " + inputLastName.value;
+    var inputUser = document.getElementById("inputUser");
+    var inputUserOu = document.getElementById("inputUserOU");
+    var inputPassword = document.getElementById("inputPassword");
+    var inputConfPassword = document.getElementById("inputConfPassword");
+    var promptNextLogin = document.getElementById("promptNextLogin").checked;
+    var inputUPNSuffix = document.getElementById("inputUPNSuffix");
+    var inputEmailAddress = document.getElementById("inputEmailAddress");
+    var inputHomeDirectory = document.getElementById("inputHomeDirectory");
+    var inputHomeDrive = document.getElementById("inputHomeDrive");
+    var inputProfilePath = document.getElementById("inputProfilePath");
+    var inputScriptPath = document.getElementById("inputScriptPath");
+    var inputGroupDN = document.getElementById("inputGroupDN");
+    var inputUserOU = document.getElementById("inputUserOU");
+
+    addUserBtn.setAttribute("disabled","disabled");
+
+    if(inputFirstName.value == "" || inputLastName.value == "" || inputUserOu.value == "" || inputUser.value == "") {
+
+    if(inputFirstName.value == "") {
+      inputFirstName.classList.add("is-invalid"); addUserBtn.classList.add("is-invalid"); invalidFeedbackMsg.innerHTML = "Missing Fields"; } else { inputFirstName.classList.remove("is-invalid"); }
+    if(inputLastName.value == "") {
+        inputLastName.classList.add("is-invalid"); addUserBtn.classList.add("is-invalid"); invalidFeedbackMsg.innerHTML = "Missing Fields"; } else { inputLastName.classList.remove("is-invalid"); }
+    if(inputUserOu.value == "") {
+            inputUserOu.classList.add("is-invalid"); addUserBtn.classList.add("is-invalid"); invalidFeedbackMsg.innerHTML = "Missing Fields"; } else { inputUserOu.classList.remove("is-invalid"); }
+    if(inputUser.value == "") {
+        inputUser.classList.add("is-invalid"); addUserBtn.classList.add("is-invalid"); invalidFeedbackMsg.innerHTML = "Missing Fields"; } else { inputUser.classList.remove("is-invalid"); }
+
+    addUserBtn.removeAttribute("disabled");
+
+    } else {
+
+    if(inputPassword.value !== inputConfPassword.value) {
+
+      addUserBtn.classList.add("is-invalid");
+      inputPassword.classList.add("is-invalid");
+      inputConfPassword.classList.add("is-invalid");
+      inputUser.classList.remove("is-invalid");
+      invalidFeedbackMsg.innerHTML = "Passwords do not match";
+
+      addUserBtn.removeAttribute("disabled");
+
+    } else {
+
+      var username = inputUser.value;
+      var originalPassword = inputPassword.value;
+      if(promptNextLogin == true) {
+        var password = '{"unicodePwd":"' + originalPassword + '","pwdLastSet":"0","userAccountControl":"544"}';
+      } else {
+        var password = '{"unicodePwd":"' + originalPassword + '","userAccountControl":"66080"}';
+      }
+      var ou = inputUserOu.value;
+
+      var data = {}
+
+      data.objectClass = "User";
+      if(inputFirstName.value != "" && inputLastName.value != "") { data.displayName = inputFirstName.value + " " + inputLastName.value } else { data.displayName = inputFirstName.value }
+      if(inputUser.value != "" && inputUPNSuffix.value != "") { data.userPrincipalName = inputUser.value + "@" + inputUPNSuffix.value } else { data.userPrincipalName = inputUser.value }
+      if(inputFirstName.value != "") { data.givenName = inputFirstName.value }
+      if(inputLastName.value != "") { data.sn = inputLastName.value }
+      if(inputEmailAddress.value != "") { data.mail = inputEmailAddress.value.replace(/%USERNAME%/gi, inputUser.value) }
+      if(inputUser.value != "") { data.sAMAccountName = inputUser.value }
+      if(inputEmailAddress.value != "") { data.proxyAddresses = "SMTP:" + inputEmailAddress.value.replace(/%USERNAME%/gi, inputUser.value); }
+      if(inputHomeDirectory.value != "") { data.homeDirectory = inputHomeDirectory.value }
+      if(inputProfilePath.value != "") { data.profilePath = inputProfilePath.value }
+      if(inputScriptPath.value != "") { data.scriptPath = inputScriptPath.value }
+      if(inputHomeDrive.value != "") { data.homeDrive = inputHomeDrive.value }
+
+      data = btoa(JSON.stringify(data));
+
+        api.addUser(ou,data, function(result){
+
+          if(result.startsWith("Error")) {
+            addUserBtn.classList.add("is-invalid");
+            inputUser.classList.add("is-invalid");
+            inputPassword.classList.add("is-invalid");
+            inputConfPassword.classList.add("is-invalid");
+            invalidFeedbackMsg.innerHTML = result;
+          }
+
+          if(result == "Success") {
+
+            api.modifyUser(username,password, function(result){
+              inputGroupDN = inputGroupDN.value.split("\n")
+              inputGroupDN.forEach(function(group){
+                api.addUserToGroup(username,group,function(result){ })
+              })
+
+              if(result == "Success") {
+                window.scrollTo(0,0);
+                if(originalPassword == "" && promptNextLogin != true) { cardBody.innerHTML = `<p>Account Added Successfully</p><p>${actualName} has <b>no password</b></p>
+                  <input id="resetPage" onclick="window.location.href='addnewuser'" type="button" class="btn btn-success" href="#" value="Back">`; }
+                if(originalPassword != "" && promptNextLogin != true) {
+                  cardBody.innerHTML = `<p>Account Added Successfully</p><p>${actualName}'s password is: <b>${originalPassword}</b></p>
+                  <input id="resetPage" onclick="window.location.href='addnewuser'" type="button" class="btn btn-success" href="#" value="Back">`;
+                }
+                if(originalPassword == "" && promptNextLogin == true) { cardBody.innerHTML = `<p>Account Added Successfully</p><p>${actualName} has <b>no password</b></p><p>They will be prompted on next login to change the password again.</p>
+                  <input id="resetPage" onclick="window.location.href='addnewuser'" type="button" class="btn btn-success" href="#" value="Back">`; }
+                if(originalPassword != "" && promptNextLogin == true) {
+                  cardBody.innerHTML = `<p>Account Added Successfully</p><p>${actualName}'s password is: <b>${originalPassword}</b></p><p>They will be prompted on next login to change the password again.</p>
+                  <input id="resetPage" onclick="window.location.href='addnewuser'" type="button" class="btn btn-success" href="#" value="Back">`;
+                }
+              }
+            })
+
+          }
+
+        })
+
+      }
+
+    }
+
+  }
+
+  function usernameFormat(chosenFormat){
+    var firstNameField = document.getElementById("inputFirstName");
+    var lastNameField = document.getElementById("inputLastName");
+    var usernameField = document.getElementById("inputUser");
+    var firstName = "";
+    var lastName = "";
+    var createdUsername = "";
+
+    switch(chosenFormat) {
+      case "1":
+        firstNameField.addEventListener("focusout", function(){
+          firstName = firstNameField.value.substring(0, 1);
+          createdUsername = firstName + lastNameField.value;
+          createdUsername = createdUsername.toLowerCase();
+          usernameField.value = createdUsername;
+        })
+        lastNameField.addEventListener("focusout", function(){
+          firstName = firstNameField.value.substring(0, 1);
+          createdUsername = firstName + lastNameField.value;
+          createdUsername = createdUsername.toLowerCase();
+          usernameField.value = createdUsername;
+        })
+        break;
+      case "2":
+      firstNameField.addEventListener("focusout", function(){
+        firstName = firstNameField.value.substring(0, 1);
+        createdUsername = firstName + "." + lastNameField.value;
+        createdUsername = createdUsername.toLowerCase();
+        usernameField.value = createdUsername;
+      })
+      lastNameField.addEventListener("focusout", function(){
+        firstName = firstNameField.value.substring(0, 1);
+        createdUsername = firstName + "." + lastNameField.value;
+        createdUsername = createdUsername.toLowerCase();
+        usernameField.value = createdUsername;
+      })
+        break;
+      case "3":
+      firstNameField.addEventListener("focusout", function(){
+        createdUsername = firstNameField.value + "." + lastNameField.value;
+        createdUsername = createdUsername.toLowerCase();
+        usernameField.value = createdUsername;
+      })
+      lastNameField.addEventListener("focusout", function(){
+        createdUsername = firstNameField.value + "." + lastNameField.value;
+        createdUsername = createdUsername.toLowerCase();
+        usernameField.value = createdUsername;
+      })
+        break;
+      case "4":
+      firstNameField.addEventListener("focusout", function(){
+        createdUsername = firstNameField.value + lastNameField.value;
+        createdUsername = createdUsername.toLowerCase();
+        usernameField.value = createdUsername;
+      })
+      lastNameField.addEventListener("focusout", function(){
+        createdUsername = firstNameField.value + lastNameField.value;
+        createdUsername = createdUsername.toLowerCase();
+        usernameField.value = createdUsername;
+      })
+        break;
+      case "5":
+      firstNameField.addEventListener("focusout", function(){
+        lastName = lastNameField.value.substring(0, 1);
+        createdUsername = firstNameField.value + lastName;
+        createdUsername = createdUsername.toLowerCase();
+        usernameField.value = createdUsername;
+      })
+      lastNameField.addEventListener("focusout", function(){
+        lastName = lastNameField.value.substring(0, 1);
+        createdUsername = firstNameField.value + lastName;
+        createdUsername = createdUsername.toLowerCase();
+        usernameField.value = createdUsername;
+      })
+        break;
+      case "6":
+      firstNameField.addEventListener("focusout", function(){
+        lastName = lastNameField.value.substring(0, 1);
+        createdUsername = firstNameField.value + "." + lastName;
+        createdUsername = createdUsername.toLowerCase();
+        usernameField.value = createdUsername;
+      })
+      lastNameField.addEventListener("focusout", function(){
+        lastName = lastNameField.value.substring(0, 1);
+        createdUsername = firstNameField.value + "." + lastName;
+        createdUsername = createdUsername.toLowerCase();
+        usernameField.value = createdUsername;
+      })
+        break;
+      case "7":
+      firstNameField.addEventListener("focusout", function(){
+        firstName = firstNameField.value.substring(0, 1);
+        createdUsername = lastNameField.value + firstName;
+        createdUsername = createdUsername.toLowerCase();
+        usernameField.value = createdUsername;
+      })
+      lastNameField.addEventListener("focusout", function(){
+        firstName = firstNameField.value.substring(0, 1);
+        createdUsername = lastNameField.value + firstName;
+        createdUsername = createdUsername.toLowerCase();
+        usernameField.value = createdUsername;
+      })
+        break;
+      case "8":
+      firstNameField.addEventListener("focusout", function(){
+        createdUsername = lastName + firstName;
+        createdUsername = createdUsername.toLowerCase();
+        usernameField.value = createdUsername;
+      })
+      lastNameField.addEventListener("focusout", function(){
+        createdUsername = lastName + firstName;
+        createdUsername = createdUsername.toLowerCase();
+        usernameField.value = createdUsername;
+      })
+        break;
+      case "9":
+      firstNameField.addEventListener("focusout", function(){
+        createdUsername = lastName + "." + firstName;
+        createdUsername = createdUsername.toLowerCase();
+        usernameField.value = createdUsername;
+      })
+      lastNameField.addEventListener("focusout", function(){
+        createdUsername = lastName + "." + firstName;
+        createdUsername = createdUsername.toLowerCase();
+        usernameField.value = createdUsername;
+      })
+        break;
+      case "10":
+      firstNameField.addEventListener("focusout", function(){
+        createdUsername = firstName;
+        createdUsername = createdUsername.toLowerCase();
+        usernameField.value = createdUsername;
+      })
+      lastNameField.addEventListener("focusout", function(){
+        createdUsername = firstName;
+        createdUsername = createdUsername.toLowerCase();
+        usernameField.value = createdUsername;
+      })
+        break;
+      case "11":
+      firstNameField.addEventListener("focusout", function(){
+        createdUsername = lastName;
+        createdUsername = createdUsername.toLowerCase();
+        usernameField.value = createdUsername;
+      })
+      lastNameField.addEventListener("focusout", function(){
+        createdUsername = lastName;
+        createdUsername = createdUsername.toLowerCase();
+        usernameField.value = createdUsername;
+      })
+        break;
+      default:
+      firstNameField.addEventListener("focusout", function(){
+        firstName = firstNameField.value.substring(0, 1);
+        createdUsername = firstName + lastNameField.value;
+        createdUsername = createdUsername.toLowerCase();
+        usernameField.value = createdUsername;
+      })
+      lastNameField.addEventListener("focusout", function(){
+        firstName = firstNameField.value.substring(0, 1);
+        createdUsername = firstName + lastNameField.value;
+        createdUsername = createdUsername.toLowerCase();
+        usernameField.value = createdUsername;
+      })
+    }
+  }
+
+  // usernameFormat(99);
+
+function toggleAdvancedOptionsIcon(){
+  if(document.getElementById("advancedOptionsIcon").getAttribute("class") == "svg-inline--fa fa-plus-square fa-w-14") {
+  document.getElementById("advancedOptionsIcon").setAttribute("class","fas fa-minus-square");
+} else {
+  document.getElementById("advancedOptionsIcon").setAttribute("class","fas fa-plus-square");
+}
+}
+
+  document.getElementById("inputUserTemplate").addEventListener("change", function() {
+      getTemplateData(document.getElementById("inputUserTemplate").value);
+  });
+</script>

@@ -1,0 +1,45 @@
+<main>
+    <div class="container">
+        <div class="row justify-content-center login-panel">
+            <div class="col-lg-5">
+                <div class="card shadow-lg border-0 rounded-lg mt-2">
+                    <div class="card-header d-flex justify-content-center">
+                      <img style="max-width: 140px; max-height: 110px" src="img/dog.png">
+                    </div>
+                    <div class="card-body">
+                      <form action="/login" method="post">
+                            <div class="form-group">
+                              <label class="small mb-1" for="username">Username</label><input autofocus required name="username" class="form-control py-4" id="username" type="text" value=""/>
+                            </div>
+                            <div class="form-group">
+                              <label class="small mb-1" for="password">Password</label><input required name="password" class="form-control py-4" id="password" type="password" value=""/>
+                              <div class="invalid-feedback">Login Failed</div>
+                            </div>
+
+                            <div class="form-group float-right mb-0"><input type="submit" class="btn btn-primary" href="#" value="Login"></div>
+                        </form>
+                    </div>
+                    <div class="card-footer text-center">
+                        <div class="small">Please login with your network credentials</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+<script>
+ var username = document.getElementById("username");
+ var password = document.getElementById("password");
+
+if(window.location.href.endsWith("failed")) {
+  username.classList.add("is-invalid");
+  password.classList.add("is-invalid");
+  const urlString = window.location.href;
+  const urlObj = new URL(urlString);
+  var failedUsername = urlObj.search.split('&');
+  failedUsername = failedUsername[0];
+  failedUsername = failedUsername.substring(1);
+  username.value = failedUsername;
+  password.focus();
+ }
+</script>

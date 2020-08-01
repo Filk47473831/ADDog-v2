@@ -1,0 +1,249 @@
+<main>
+    <div class="container-fluid">
+        <h3 class="mt-4">Bulk Reset User Passwords</h3>
+        <ol class="breadcrumb mb-4">
+            <li class="breadcrumb-item"><a href="/">Dashboard</a></li>
+            <li class="breadcrumb-item active">Bulk Reset User Passwords</li>
+        </ol>
+            <div id="resetPwBulkDiv" class="col-sm-12 col-md-10 col-lg-8 col-xl-6">
+            <div class="card shadow-lg border-0 rounded-lg mt-2">
+                <div id="card-body" class="card-body">
+                  <h6 class="mb-3">Reset the passwords of all users in the selected organizational unit</h6>
+                        <div class="form-group">
+                          <label class="small mb-1" for="ouTree">Target OU</label>
+                          <div tabindex="-1" id="ouTree"></div>
+                          <input tabindex="-1" disabled autocomplete="off" required style="border:0px" required class="form-control mt-3" id="inputUserOU" value="" placeholder="Select target OU for new users">
+                          <p style="margin-left:12px" class="small mt-3 unselectable" id="targetCount"></p>
+                        </div>
+                        <div class="form-group">
+                            <label class="small mb-1" for="inputPasswordFormat">Select Password Format</label>
+                            <select id="inputPasswordFormat" class="form-control">
+                              <option value="1">Random Simple</option>
+                              <option selected value="2">Random Complex</option>
+                              <option value="3">3 Random Words + Number</option>
+                              <option value="4">Custom</option>
+                            </select>
+                        </div>
+                        <div hidden id="customerPasswordFormGroup" class="form-group">
+                            <label class="small mb-1" for="inputCustomPassword">Custom Password</label>
+                            <input class="form-control" id="inputCustomPassword" type="text" placeholder="Custom Password" value=""/>
+                        </div>
+                        <div hidden id="passwordLength"></div>
+                        <div class="form-check">
+                          <input type="checkbox" class="form-check-input" id="promptNextLogin">
+                          <label class="form-check-label small unselectable" for="promptNextLogin">Prompt each user to change password on next login (this may not allow the user to login if connecting remotely).</label>
+                        </div>
+                        <div class="form-group d-flex align-items-center justify-content-between mt-4 mb-0">
+                            <input id="resetPwBulkBtn" onclick="bulkPwReset()" type="button" class="btn btn-primary" href="#" value="Reset Passwords">&nbsp;&nbsp;
+                            <div id="invalid-feedback" class="invalid-feedback">Invalid Users Found</div>
+                        </div>
+                </div>
+            </div>
+            </div>
+    </div>
+</main>
+<script src="js/apiquery.js"></script>
+<script src="js/password.js"></script>
+<script>
+
+const api = new API();
+var users = "";
+var password = "";
+var promptNextLogin = false;
+var resetPwBulkBtn = document.getElementById("resetPwBulkBtn");
+
+document.getElementById("inputPasswordFormat").addEventListener("change", function(){
+  if(document.getElementById("inputPasswordFormat").value == "4"){
+    document.getElementById("customerPasswordFormGroup").removeAttribute("hidden");
+    document.getElementById("inputCustomPassword").focus();
+  } else { document.getElementById("customerPasswordFormGroup").setAttribute("hidden","hidden"); }
+})
+
+api.ouTree(function(outree){
+  var ouTreeList = `<ul><li class="jstree-open">Organizational Units<ul>`;
+  outree.forEach(element => ouTreeList += `<li value="${element.dn}">${element.name}</li>`)
+  ouTreeList = ouTreeList + `</ul></li></ul>`;
+  $('#ouTree').html(ouTreeList)
+  $('#ouTree').jstree()
+  $('#ouTree').on('changed.jstree', function (e, data) {
+      var i, j, r = [];
+      for(i = 0, j = data.selected.length; i < j; i++) {
+        r.push(data.instance.get_node(data.selected[i]).li_attr.value);
+      }
+      document.getElementById("inputUserOU").value = r.join(', ');
+      getUsers();
+  })
+})
+
+async function getUsers() {
+  var inputUserOU = document.getElementById("inputUserOU").value;
+  document.getElementById("targetCount").innerText = "";
+  api.allUsers(inputUserOU,function(userlist){
+    users = userlist;
+    document.getElementById("targetCount").innerText = userlist.length + " user(s) will have their passwords reset.";
+  });
+}
+
+async function bulkPwReset() {
+  var error = false;
+  var invalidFeedbackMsg = document.getElementById("invalid-feedback");
+  var targetSearchOU = document.getElementById("inputUserOU").value;
+  if(document.getElementById("inputPasswordFormat").value == "4") {
+    password = document.getElementById("inputCustomPassword").value;
+  }
+  var passwordLength = document.getElementById("passwordLength");
+  promptNextLogin = document.getElementById("promptNextLogin").checked;
+  var cardBody = document.getElementById("card-body");
+  var resetPwBulkDiv = document.getElementById("resetPwBulkDiv");
+  var status = "";
+  var row = "";
+
+  if(document.getElementById("targetCount").innerText == "") { error = "No users selected"; }
+  if(document.getElementById("inputPasswordFormat").value == "4") {
+    if(password.length < passwordLength.innerText) { error = "Password must be at least " + passwordLength.innerText + " character(s) long"; }
+  }
+  if(targetSearchOU == "") { error = "Please select a target OU"; }
+
+  if(!error) {
+
+  var output = `<table width="100%" class="table table-striped table-borderless table-hover small" id="dataTable-bulkUsers">
+          <thead>
+              <tr>
+                  <th>Name</th>
+                  <th>Username</th>
+                  <th>Password</th>
+                  <th>Status</th>
+              </tr>
+          </thead>
+          <tbody>`;
+
+       users.forEach(function(user, index) {
+            if(user != null) {
+
+              if(document.getElementById("inputPasswordFormat").value != "4") {
+                password = selectPassword(document.getElementById("inputPasswordFormat").value);
+              }
+
+              output +=
+                      `<tr id="${user.sAMAccountName}-row" class="odd gradeX">
+                              <td>${user.name}</td>
+                              <td>${user.sAMAccountName}</td>
+                              <td>${password}</td>
+                              <td id="${user.sAMAccountName}-status"></td>
+                            </tr>`;
+
+           }
+         });
+
+   output += `</tbody>
+   </table>`;
+
+       resetPwBulkDiv.setAttribute("class", "col-12");
+       cardBody.innerHTML = output;
+
+       cardBody.innerHTML += `<input disabled id="resetPwBulkBackBtn" onclick="location.reload()" type="button" class="btn btn-primary" href="#" value="Back">`;
+       drawTable();
+
+       processArray(users);
+
+       async function processArray(users) {
+         result = ""
+          for (const [index, user] of users.entries()) {
+            if(promptNextLogin == true) {
+              var data = '{"unicodePwd":"' + password + '","pwdLastSet":"0","userAccountControl":"544"}';
+            } else {
+              var data = '{"unicodePwd":"' + password + '","userAccountControl":"66080"}';
+            }
+            await modifyUser(user.sAMAccountName,data,index)
+          }
+
+        enableTableBtns();
+        document.getElementById("resetPwBulkBackBtn").removeAttribute("disabled")
+        }
+
+
+  } else {
+    resetPwBulkBtn.classList.add("is-invalid");
+    invalidFeedbackMsg.innerText = error;
+  }
+
+}
+
+async function modifyUser(user,data,index) {
+
+  return new Promise(resolve => {
+
+    api.modifyUser(user,data, function(result){
+
+       if(result !== null) {
+         if(result !== "Success") {
+           document.getElementById(user + "-status").innerText = result;
+           document.getElementById(user + "-row").style.backgroundColor = "#edd8d8";
+           resolve("Done with error")
+         } else {
+           document.getElementById(user + "-status").innerText = "Reset Successfully";
+           document.getElementById(user + "-row").style.backgroundColor = "#ddedd8";
+           resolve("Done")
+         }
+       }
+
+    });
+
+  });
+
+}
+
+function drawTable() {
+
+  $('#dataTable-bulkUsers').dataTable( {
+    "pageLength": 100,
+    "sPaginationType": "listbox",
+    dom: 'Bfrtip',
+    buttons: {
+          buttons: [
+              { extend: 'copy', className: 'btn btn-primary btn-sm', enabled: false },
+              { extend: 'csv', className: 'btn btn-primary btn-sm', enabled: false },
+              { extend: 'excel', className: 'btn btn-primary btn-sm', enabled: false },
+              { extend: 'pdf', className: 'btn btn-primary btn-sm', enabled: false },
+              { extend: 'print', className: 'btn btn-primary btn-sm', enabled: false }
+          ]
+      }
+  } );
+}
+
+function enableTableBtns() {
+  $('#dataTable-bulkUsers').DataTable().buttons().enable();
+}
+
+document.getElementById("inputCustomPassword").addEventListener('keyup', function(event) {
+    if(event.key == "Enter") { bulkPwReset(); }
+});
+
+
+function selectPassword(choice) {
+  var randomPassword = "";
+  switch(choice) {
+    case "1":
+      randomPassword = words[Math.floor(Math.random() * words.length)] + Math.floor((Math.random() * 100));
+      break;
+    case "2":
+      var randomPassword1 = words[Math.floor(Math.random() * words.length)] + "-"
+      randomPassword1 = randomPassword1.charAt(0).toUpperCase() + randomPassword1.slice(1)
+      var randomPassword2 = words[Math.floor(Math.random() * words.length)] + Math.floor((Math.random() * 100));
+      randomPassword2 = randomPassword2.charAt(0).toUpperCase() + randomPassword2.slice(1)
+      randomPassword = randomPassword1 + randomPassword2
+      break;
+    case "3":
+      var randomPassword1 = words[Math.floor(Math.random() * words.length)]
+      var randomPassword2 = words[Math.floor(Math.random() * words.length)]
+      var randomPassword3 = words[Math.floor(Math.random() * words.length)]
+      randomPassword = randomPassword1 + randomPassword2 + randomPassword3
+      randomPassword = randomPassword.charAt(0).toUpperCase() + randomPassword.slice(1) + Math.floor((Math.random() * 10));
+      break;
+    default:
+      randomPassword = words[Math.floor(Math.random() * words.length)] + Math.floor((Math.random() * 100));
+      break;
+  }
+  return randomPassword;
+}
+</script>

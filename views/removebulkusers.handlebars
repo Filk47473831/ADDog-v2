@@ -1,0 +1,105 @@
+<main>
+    <div class="container-fluid">
+        <h3 class="mt-4">Remove Bulk Users</h3>
+        <ol class="breadcrumb mb-4">
+            <li class="breadcrumb-item"><a href="/">Dashboard</a></li>
+            <li class="breadcrumb-item active">Remove Bulk Users</li>
+        </ol>
+            <div id="resetPwBulkDiv" class="col-sm-12 col-md-10 col-lg-8 col-xl-6">
+            <div class="card shadow-lg border-0 rounded-lg mt-2">
+                <div id="card-body" class="card-body">
+                  <h6 class="mb-3">Remove all users in the selected organizational unit, permanently deleting the accounts. No files will be deleted</h6>
+                        <div class="form-group">
+                          <label class="small mb-1" for="ouTree">Target OU</label>
+                          <div tabindex="-1" id="ouTree"></div>
+                          <input tabindex="-1" disabled autocomplete="off" required style="border:0px" required class="form-control mt-3" id="inputUserOU" value="" placeholder="Select target OU for new users">
+                          <p style="margin-left:12px" class="small mt-3 unselectable" id="targetCount"></p>
+                        </div>
+                        <div class="form-group d-flex align-items-center justify-content-between mt-4 mb-0">
+                            <input id="bulkRemoveUsersBtn" onclick="bulkRemoveUsers()" type="button" class="btn btn-danger" href="#" value="Remove Users">&nbsp;&nbsp;
+                            <div id="invalid-feedback" class="invalid-feedback"></div>
+                        </div>
+                </div>
+            </div>
+            </div>
+    </div>
+</main>
+<script src="js/apiquery.js"></script>
+<script>
+
+const api = new API();
+var users = "";
+var promptNextLogin = false;
+var cardBody = document.getElementById("card-body");
+var invalidFeedbackMsg = document.getElementById("invalid-feedback");
+var bulkRemoveUsersBtn = document.getElementById("bulkRemoveUsersBtn");
+
+api.ouTree(function(outree){
+  var ouTreeList = `<ul><li class="jstree-open">Organizational Units<ul>`;
+  outree.forEach(element => ouTreeList += `<li value="${element.dn}">${element.name}</li>`)
+  ouTreeList = ouTreeList + `</ul></li></ul>`;
+  $('#ouTree').html(ouTreeList)
+  $('#ouTree').jstree()
+  $('#ouTree').on('changed.jstree', function (e, data) {
+      var i, j, r = [];
+      for(i = 0, j = data.selected.length; i < j; i++) {
+        r.push(data.instance.get_node(data.selected[i]).li_attr.value);
+      }
+      document.getElementById("inputUserOU").value = r.join(', ');
+      getUsers();
+  })
+})
+
+async function getUsers() {
+  var inputUserOU = document.getElementById("inputUserOU").value;
+  document.getElementById("targetCount").innerText = "";
+  api.allUsers(inputUserOU,function(userlist){
+    users = userlist;
+    document.getElementById("targetCount").innerText = userlist.length + " user(s) will be removed.";
+  });
+}
+
+async function bulkRemoveUsers() {
+
+  if(document.getElementById("targetCount").innerText == "") { error = "No users selected"; }
+
+    if(users != "") {
+
+       bulkRemoveUsersBtn.value = "Removing";
+
+       users.forEach(function(user, index) {
+
+         api.delUser(user.sAMAccountName, function(result){
+
+           if(result == "Success") {
+             cardBody.innerHTML = `<p>Users have been removed successfully</p>
+               <input id="resetPage" onclick="location.reload()" type="button" class="btn btn-success" href="#" value="Back">`;
+           }
+
+         });
+       });
+
+} else {
+  bulkRemoveUsersBtn.classList.add("is-invalid");
+  invalidFeedbackMsg.innerText = error;
+}
+
+}
+
+function drawTable() {
+  $('#dataTable-bulkUsers').dataTable( {
+    "pageLength": 100,
+    "sPaginationType": "listbox",
+    dom: 'Bfrtip',
+    buttons: {
+          buttons: [
+              { extend: 'copy', className: 'btn btn-primary btn-sm' },
+              { extend: 'csv', className: 'btn btn-primary btn-sm' },
+              { extend: 'excel', className: 'btn btn-primary btn-sm' },
+              { extend: 'pdf', className: 'btn btn-primary btn-sm' },
+              { extend: 'print', className: 'btn btn-primary btn-sm' }
+          ]
+      }
+  } );
+}
+</script>

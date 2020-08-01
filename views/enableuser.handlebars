@@ -1,0 +1,131 @@
+<main>
+    <div class="container-fluid">
+        <h3 class="mt-4">Enable User</h3>
+        <ol class="breadcrumb mb-4">
+            <li class="breadcrumb-item"><a href="/">Dashboard</a></li>
+            <li class="breadcrumb-item active">Enable User</li>
+        </ol>
+            <div class="col-sm-12 col-md-10 col-lg-8 col-xl-6">
+            <div class="card shadow-lg border-0 rounded-lg mt-2">
+                <div id="card-body" class="card-body">
+                      <h6 class="mb-3">Enable a user and allow them to login their account</h6>
+                      <div class="form-group">
+                          <label class="small mb-1" for="inputUser">Select User</label>
+                          <input autofocus autocomplete="off" required class="form-control" id="inputUser" type="text" placeholder="e.g. John Smith" value=""/>
+                          <input disabled tabindex="-1" readonly style="margin-top:3px;border:0px;font-size:0.8rem" class="form-control" id="inputUser-id">
+                      </div>
+                      <div class="form-group d-flex align-items-center justify-content-between mt-4 mb-0">
+                          <input id="enableUserBtn" onclick="enableUser()" type="button" class="btn btn-warning" href="#" value="Enable User">&nbsp;&nbsp;
+                          <div id="invalid-feedback" class="invalid-feedback"></div>
+                      </div>
+                </div>
+            </div>
+            </div>
+    </div>
+</main>
+<script src="js/apiquery.js"></script>
+<script>
+
+const api = new API();
+var cardBody = document.getElementById("card-body");
+loadAutocomplete();
+
+document.getElementById("inputUser").addEventListener('keyup', function(event) {
+    if(event.key == "Enter") { enableUser(); }
+});
+
+function enableUser() {
+
+    var invalidFeedbackMsg = document.getElementById("invalid-feedback");
+    var enableUserBtn = document.getElementById("enableUserBtn");
+    var inputUser = document.getElementById("inputUser-id");
+    var actualName = document.getElementById("inputUser");
+
+    enableUserBtn.setAttribute("disabled","disabled");
+
+    if(inputUser.value == "") {
+        actualName.classList.add("is-invalid"); enableUserBtn.classList.add("is-invalid"); invalidFeedbackMsg.innerHTML = "Missing Fields";
+        enableUserBtn.removeAttribute("disabled");
+    } else {
+
+      var username = inputUser.value;
+      var data = '{"UserAccountControl":"66080"}';
+
+      api.modifyUser(username, data, function(result){
+
+        if(result == "No results for lookup") {
+          enableUserBtn.classList.add("is-invalid");
+          inputUser.classList.add("is-invalid");
+          invalidFeedbackMsg.innerHTML = "User does not exist";
+
+          enableUserBtn.removeAttribute("disabled");
+        }
+
+        if(result.startsWith("Error")) {
+          enableUserBtn.classList.add("is-invalid");
+          inputUser.classList.add("is-invalid");
+          invalidFeedbackMsg.innerHTML = "Error";
+
+          enableUserBtn.removeAttribute("disabled");
+        }
+
+        if(result == "Success") {
+          window.scrollTo(0,0);
+          cardBody.innerHTML = `<p>${actualName.value} has been enabled successfully</p>
+            <input id="resetPage" onclick="resetPage()" type="button" class="btn btn-warning" href="#" value="Back">`;
+        }
+
+      });
+
+  }
+
+}
+
+function resetPage() {
+  cardBody.innerHTML = `<div class="form-group">
+                          <label class="small mb-1" for="inputUser">Select User</label>
+                          <input autocomplete="off" required class="form-control" id="inputUser" type="text" placeholder="e.g. John Smith" value=""/>
+                          <input tabindex="-1" readonly style="margin-top:3px;border:0px;font-size:0.8rem" class="form-control" id="inputUser-id">
+                      </div>
+                      <div class="form-group d-flex align-items-center justify-content-between mt-4 mb-0">
+                          <input id="enableUserBtn" type="button" class="btn btn-warning" href="#" value="Enable User">&nbsp;&nbsp;
+                          <div id="invalid-feedback" class="invalid-feedback"></div>
+                      </div>`;
+                      loadAutocomplete();
+}
+
+function loadAutocomplete(){
+    api.allUsers(null,function(users){
+      var userList = "";
+      users.forEach(getUserInfo)
+      function getUserInfo(item,index) {
+        var displayName = item.displayName;
+        if(item.userAccountControl == "66082" || item.userAccountControl == "514") { if(item.displayName == undefined) { displayName = item.cn; }; userList += `{ "value": "${item.sAMAccountName}", "label": "${displayName}", "status": "${item.userAccountControl}" },` }
+      }
+      userList = JSON.parse("[" + userList.substring(0, userList.length - 1) + "]");
+
+  $("#inputUser").autocomplete({
+      minLength: 0,
+      source: function(request, response) {
+          var results = $.ui.autocomplete.filter(userList, request.term);
+          response(results.slice(0, 12));
+      },
+      focus: function( event, ui ) {
+        $( "#inputUser" ).val( ui.item.label );
+        $( "#inputUser-id" ).val( ui.item.value );
+        return false;
+      },
+      select: function( event, ui ) {
+        $( "#inputUser" ).val( ui.item.label );
+        $( "#inputUser-id" ).val( ui.item.value );
+        return false;
+      }
+    })
+    .autocomplete( "instance" )._renderItem = function( ul, item ) {
+      return $( "<li>" )
+        .append( "<div class='mt-1'>" + item.label + "</div>" )
+        .appendTo( ul );
+    };
+  } );
+}
+</script>

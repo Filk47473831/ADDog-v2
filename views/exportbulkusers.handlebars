@@ -1,0 +1,158 @@
+<main>
+    <div class="container-fluid">
+        <h3 class="mt-4">Export Bulk Users</h3>
+        <ol class="breadcrumb mb-4">
+            <li class="breadcrumb-item"><a href="/">Dashboard</a></li>
+            <li class="breadcrumb-item active">Export Bulk Users</li>
+        </ol>
+            <div id="bulkExportDiv" class="col-sm-12 col-md-10 col-lg-8 col-xl-6">
+            <div class="card shadow-lg border-0 rounded-lg mt-2">
+                <div style="overflow:hidden" id="card-body" class="card-body">
+                  <h6 class="mb-3">Display attributes for all users in the selected organizational unit</h6>
+                        <div class="form-group">
+                          <label class="small mb-1" for="ouTree">Target OU</label>
+                          <div tabindex="-1" id="ouTree"></div>
+                          <input tabindex="-1" disabled autocomplete="off" required style="border:0px" required class="form-control mt-3" id="inputUserOU" value="" placeholder="Select target OU">
+                          <p style="margin-left:12px" class="small mt-3 unselectable" id="targetCount"></p>
+                        </div>
+                        <div class="form-group d-flex align-items-center justify-content-between mt-4 mb-0">
+                            <input disabled id="bulkExportUsersBtn" onclick="exportUsers()" type="button" class="btn btn-danger" href="#" value="Export Users">&nbsp;&nbsp;
+                            <div id="invalid-feedback" class="invalid-feedback"></div>
+                        </div>
+                </div>
+            </div>
+            </div>
+    </div>
+</main>
+<script src="js/apiquery.js"></script>
+<script>
+
+const api = new API();
+var users = "";
+var promptNextLogin = false;
+var cardBody = document.getElementById("card-body");
+var invalidFeedbackMsg = document.getElementById("invalid-feedback");
+var bulkExportUsersBtn = document.getElementById("bulkExportUsersBtn");
+
+api.ouTree(function(outree){
+  var ouTreeList = `<ul><li class="jstree-open">Organizational Units<ul>`;
+  outree.forEach(element => ouTreeList += `<li value="${element.dn}">${element.name}</li>`)
+  ouTreeList = ouTreeList + `</ul></li></ul>`;
+  $('#ouTree').html(ouTreeList)
+  $('#ouTree').jstree()
+  $('#ouTree').on('changed.jstree', function (e, data) {
+      var i, j, r = [];
+      for(i = 0, j = data.selected.length; i < j; i++) {
+        r.push(data.instance.get_node(data.selected[i]).li_attr.value);
+      }
+      document.getElementById("inputUserOU").value = r.join(', ');
+      getUsers();
+  })
+})
+
+async function getUsers() {
+  var inputUserOU = document.getElementById("inputUserOU").value;
+  document.getElementById("targetCount").innerText = "";
+  bulkExportUsersBtn.setAttribute("disabled", "disabled");
+  api.allUsers(inputUserOU,function(userlist){
+    users = userlist;
+    document.getElementById("targetCount").innerText = userlist.length + " user(s) will be exported.";
+    bulkExportUsersBtn.removeAttribute("disabled");
+  });
+}
+
+async function exportUsers() {
+  var error = false;
+  var invalidFeedbackMsg = document.getElementById("invalid-feedback");
+  var targetSearchOU = document.getElementById("inputUserOU").value;
+  var cardBody = document.getElementById("card-body");
+  var bulkExportDiv = document.getElementById("bulkExportDiv");
+  var status = "";
+  var row = "";
+
+  if(document.getElementById("targetCount").innerText == "") { error = "No users selected"; }
+  if(targetSearchOU == "") { error = "Please select a target OU"; }
+
+  if(!error) {
+
+  var output = `<table width="100%" class="table table-striped table-borderless table-hover small" id="dataTable-bulkUsers">
+          <thead>
+              <tr>
+                  <th>Name</th>
+                  <th>Username</th>
+                  <th>UPN</th>
+                  <th>DN</th>
+                  <th>Email</th>
+                  <th>Proxy Addresses</th>
+                  <th>Home Directory</th>
+                  <th>Home Drive Letter</th>
+                  <th>Profile Path</th>
+                  <th>Script Path</th>
+              </tr>
+          </thead>
+          <tbody>`;
+
+
+       users.forEach(function(user, index) {
+            if(user != null) {
+
+              if(user.name == undefined) { user.name = "" }
+              if(user.sAMAccountName == undefined) { user.sAMAccountName = "" }
+              if(user.userPrincipalName == undefined) { user.userPrincipalName = "" }
+              if(user.mail == undefined) { user.mail = "" }
+              if(user.proxyAddresses == undefined) { user.proxyAddresses = "" }
+              if(user.homeDirectory == undefined) { user.homeDirectory = "" }
+              if(user.homeDrive == undefined) { user.homeDrive = "" }
+              if(user.profilePath == undefined) { user.profilePath = "" }
+              if(user.scriptPath == undefined) { user.scriptPath = "" }
+
+              output +=
+                      `<tr id="${index}-row" class="odd gradeX">
+                              <td>${user.name}</td>
+                              <td>${user.sAMAccountName}</td>
+                              <td>${user.userPrincipalName}</td>
+                              <td>${user.dn}</td>
+                              <td>${user.mail}</td>
+                              <td>${user.proxyAddresses}</td>
+                              <td>${user.homeDirectory}</td>
+                              <td>${user.homeDrive.charAt(0)}</td>
+                              <td>${user.profilePath}</td>
+                              <td>${user.scriptPath}</td>
+                            </tr>`;
+
+           }
+         });
+
+   output += `</tbody>
+   </table>`;
+
+       bulkExportDiv.setAttribute("class", "col-12");
+       cardBody.innerHTML = output;
+
+       cardBody.innerHTML += `<input id="resetPwBulkBackBtn" onclick="location.reload()" type="button" class="btn btn-primary" href="#" value="Back">`;
+       drawTable();
+
+  } else {
+    bulkExportUsersBtn.classList.add("is-invalid");
+    invalidFeedbackMsg.innerText = error;
+  }
+
+}
+
+function drawTable() {
+  $('#dataTable-bulkUsers').dataTable( {
+    "pageLength": 10,
+    "sPaginationType": "listbox",
+    dom: 'Bfrtip',
+    buttons: {
+          buttons: [
+              { extend: 'copy', className: 'btn btn-primary btn-sm' },
+              { extend: 'csv', className: 'btn btn-primary btn-sm' },
+              { extend: 'excel', className: 'btn btn-primary btn-sm' },
+              { extend: 'pdf', orientation: 'landscape', className: 'btn btn-primary btn-sm', pageSize: 'A1' },
+              { extend: 'print', orientation: 'landscape', className: 'btn btn-primary btn-sm' }
+          ]
+      }
+  } );
+}
+</script>

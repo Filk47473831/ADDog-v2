@@ -1,0 +1,61 @@
+  <main>
+    <div class="container-fluid">
+      <h3 class="mt-4">Remove User Template</h3>
+      <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item"><a href="/">Dashboard</a></li>
+        <li class="breadcrumb-item active">Remove User Template</li>
+      </ol>
+      <div class="col-sm-12 col-md-10 col-lg-8 col-xl-6">
+        <div class="card shadow-lg border-0 rounded-lg mt-2">
+          <div id="card-body" class="card-body">
+            <h6 class="mb-3">Remove an existing user template</h6>
+                <div class="form-group">
+                    <label class="small mb-1" for="inputUserTemplate">Select User Template</label>
+                    <select id="inputUserTemplate" class="form-control"></select>
+                </div>
+                <div class="form-group d-flex align-items-center justify-content-between mt-4 mb-0">
+                  <input id="removeUserTemplateBtn" onclick="removeUserTemplate()" type="button" class="btn btn-danger" href="#" value="Remove User Template">
+                </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+  <script src="js/apiquery.js"></script>
+  <script>
+
+  const api = new API();
+  var cardBody = document.getElementById("card-body");
+  getUserTemplates();
+
+  function isEmpty(obj) {
+    for(var key in obj) {
+        if(obj.hasOwnProperty(key))
+            return false;
+    }
+    return true;
+  }
+
+  function getUserTemplates() {
+    api.getUserTemplates(function(result) {
+        if(result == "") { window.location.href = "addtemplate"; }
+        result = JSON.parse(result)
+        if(isEmpty(result)) { window.location.href = "addtemplate"; }
+        for (const key of Object.keys(result)) {
+            document.getElementById("inputUserTemplate").innerHTML += "<option value='" + result[key].userTemplateName + "'>" + result[key].userTemplateName + "</option>";
+        }
+    })
+  }
+
+  function removeUserTemplate() {
+    var userTemplate = document.getElementById("inputUserTemplate").value;
+    if(userTemplate != "null") {
+    api.removeUserTemplate(userTemplate,function(){
+      window.scrollTo(0,0);
+      cardBody.innerHTML = `<p>${userTemplate} user template has been removed successfully</p>
+        <input id="resetPage" onclick="location.href = 'addtemplate'" type="button" class="btn btn-success" href="#" value="Back">`;
+    })
+    }
+  }
+
+  </script>

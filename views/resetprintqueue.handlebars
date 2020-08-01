@@ -1,0 +1,43 @@
+<main>
+    <div class="container-fluid">
+        <h3 class="mt-4">Reset Print Queue</h3>
+        <ol class="breadcrumb mb-4">
+            <li class="breadcrumb-item"><a href="/">Dashboard</a></li>
+            <li class="breadcrumb-item active">Reset Print Queue</li>
+        </ol>
+            <div class="col-sm-12 col-md-10 col-lg-8 col-xl-6">
+            <div class="card shadow-lg border-0 rounded-lg mt-2">
+                <div id="printResetForm" class="card-body">
+                  <h6 class="mb-3">Remove all pending or stuck print jobs in the server print queue</h6>
+                    <input hidden name="resetPrintQueue">
+                      <div class="form-group d-flex align-items-center justify-content-between mt-4 mb-0">
+                          <button id="resetPrintQueueBtn" onclick="resetPrinter()" type="button" class="btn btn-primary">Reset Print Queue</button>
+                      </div>
+                </div>
+            </div>
+            </div>
+    </div>
+</main>
+<script src="js/apiquery.js"></script>
+<script>
+
+const api = new API();
+
+function resetPrinter(){
+
+  document.getElementById("resetPrintQueueBtn").innerHTML = 'Reset Print Queue &nbsp;<i style="transform: translate(0px, -4px);" class="fas fa-circle-notch fa-spin"></i>';
+  document.getElementById("resetPrintQueueBtn").setAttribute("onclick", "");
+  document.getElementById("resetPrintQueueBtn").setAttribute("disabled", "disabled");
+
+  api.resetPrintQueue(function(result){
+    if(result == "Success") {
+      window.scrollTo(0,0);
+      document.getElementById("printResetForm").innerHTML = '<p>Print Queue Reset Successfully</p><a href="resetprintqueue"><button class="btn btn-success">Back</button></a>';
+    } else {
+      window.scrollTo(0,0);
+      document.getElementById("printResetForm").innerHTML = '<p>Print Queue Reset Failed</p><a href="resetprintqueue"><button class="btn btn-danger">Back</button></a>';
+    }
+  })
+
+}
+</script>

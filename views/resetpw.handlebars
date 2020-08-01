@@ -1,0 +1,202 @@
+<main>
+    <div class="container-fluid">
+        <h3 class="mt-4">Reset User Password</h3>
+        <ol class="breadcrumb mb-4">
+            <li class="breadcrumb-item"><a href="/">Dashboard</a></li>
+            <li class="breadcrumb-item active">Reset User Password</li>
+        </ol>
+            <div class="col-sm-12 col-md-10 col-lg-8 col-xl-6">
+            <div class="card shadow-lg border-0 rounded-lg mt-2">
+                <div id="card-body" class="card-body">
+                      <h6 class="mb-3">Reset a user password</h6>
+                        <div class="form-group">
+                            <label class="small mb-1" for="inputUser">Select User</label>
+                            <input autofocus autocomplete="chrome-off" required class="form-control" id="inputUser" type="text" placeholder="e.g. John Smith" value=""/>
+                            <input disabled tabindex="-1" readonly style="margin-top:3px;border:0px;font-size:0.8rem" class="form-control" id="inputUser-id">
+                        </div>
+                        <div class="form-group">
+                            <label class="small mb-1" for="inputPassword">New Password</label>
+                            <input autocomplete="chrome-off" required class="form-control" id="inputPassword" type="password" placeholder="New Password" value=""/>
+                        </div>
+                        <div class="form-group">
+                            <label class="small mb-1" for="inputConfPassword">Confirm Password</label>
+                            <input autocomplete="chrome-off" required class="form-control" id="inputConfPassword" type="password" placeholder="Confirm Password" value=""/>
+                            <div class="invalid-feedback"></div>
+                        </div>
+                        <div class="form-check">
+                          <input type="checkbox" class="form-check-input" id="promptNextLogin">
+                          <label class="form-check-label small unselectable" for="promptNextLogin">Prompt user to change password on next login (this may not allow the user to login if connecting remotely).</label>
+                        </div>
+                        <div class="form-group d-flex align-items-center justify-content-between mt-4 mb-0">
+                            <input id="resetPwBtn" onclick="resetPw()" type="button" class="btn btn-primary" href="#" value="Reset Password">&nbsp;&nbsp;
+                            <div id="invalid-feedback" class="invalid-feedback"></div>
+                        </div>
+                </div>
+            </div>
+            </div>
+    </div>
+</main>
+<script src="js/apiquery.js"></script>
+<script>
+
+const api = new API();
+var cardBody = document.getElementById("card-body");
+loadAutocomplete();
+
+document.getElementById("inputConfPassword").addEventListener('keyup', function(event) {
+    if(event.key == "Enter") { resetPw(); }
+});
+
+function resetPw() {
+
+    var invalidFeedbackMsg = document.getElementById("invalid-feedback");
+    var resetPwBtn = document.getElementById("resetPwBtn");
+    var inputUser = document.getElementById("inputUser-id");
+    var actualName = document.getElementById("inputUser");
+    var inputPassword = document.getElementById("inputPassword");
+    var inputConfPassword = document.getElementById("inputConfPassword");
+    var promptNextLogin = document.getElementById("promptNextLogin").checked;
+
+    resetPwBtn.setAttribute("disabled","disabled");
+
+    if(inputUser.value == "") {
+
+    if(inputUser.value == "") {
+        actualName.classList.add("is-invalid"); resetPwBtn.classList.add("is-invalid"); invalidFeedbackMsg.innerHTML = "Missing Fields"; } else { inputUser.classList.remove("is-invalid"); }
+    if(inputPassword.value == "") {
+      inputPassword.classList.add("is-invalid"); resetPwBtn.classList.add("is-invalid"); invalidFeedbackMsg.innerHTML = "Missing Fields"; } else { inputPassword.classList.remove("is-invalid"); }
+    if(inputConfPassword.value == "") {
+      inputConfPassword.classList.add("is-invalid"); resetPwBtn.classList.add("is-invalid"); invalidFeedbackMsg.innerHTML = "Missing Fields"; } else { inputConfPassword.classList.remove("is-invalid"); }
+
+    resetPwBtn.removeAttribute("disabled");
+
+    } else {
+
+    if(inputPassword.value !== inputConfPassword.value) {
+
+      resetPwBtn.classList.add("is-invalid");
+      inputPassword.classList.add("is-invalid");
+      inputConfPassword.classList.add("is-invalid");
+      inputUser.classList.remove("is-invalid");
+      invalidFeedbackMsg.innerHTML = "Passwords do not match";
+
+      resetPwBtn.removeAttribute("disabled");
+
+    } else {
+
+      var username = inputUser.value;
+      var password = inputPassword.value;
+      if(promptNextLogin == true) {
+        var data = '{"unicodePwd":"' + password + '","pwdLastSet":"0","userAccountControl":"544"}';
+      } else {
+        var data = '{"unicodePwd":"' + password + '","userAccountControl":"66080"}';
+      }
+
+      api.modifyUser(username,data, function(result){
+
+        if(result == "No results for lookup") {
+          resetPwBtn.classList.add("is-invalid");
+          actualName.classList.add("is-invalid");
+          inputPassword.classList.remove("is-invalid");
+          inputConfPassword.classList.remove("is-invalid");
+          invalidFeedbackMsg.innerHTML = "User does not exist";
+        }
+
+        if(result.startsWith("Error")) {
+          resetPwBtn.classList.add("is-invalid");
+          actualName.classList.add("is-invalid");
+          inputPassword.classList.add("is-invalid");
+          inputConfPassword.classList.add("is-invalid");
+          invalidFeedbackMsg.innerHTML = result;
+
+          resetPwBtn.removeAttribute("disabled");
+        }
+
+        if(result == "Success") {
+          window.scrollTo(0,0);
+          if(promptNextLogin == true && password == "") { cardBody.innerHTML = `<p>Password Reset Successfully.</p><p>${actualName.value} now has <b>no password</b></p><p>They will be prompted on next login to change the password again.</p>
+          <input id="resetPage" onclick="resetPage()" type="button" class="btn btn-success" href="#" value="Back">`; }
+          if(promptNextLogin == true && password != "") { cardBody.innerHTML = `<p>Password Reset Successfully.</p><p>${actualName.value}'s new password is: <b>${password}</b></p><p>They will be prompted on next login to change the password again.</p>
+          <input id="resetPage" onclick="resetPage()" type="button" class="btn btn-success" href="#" value="Back">`; }
+          if(promptNextLogin != true && password == "") { cardBody.innerHTML = `<p>Password Reset Successfully.</p><p>${actualName.value} now has <b>no password</b></p>
+          <input id="resetPage" onclick="resetPage()" type="button" class="btn btn-success" href="#" value="Back">`; }
+          if(promptNextLogin != true && password != "") { cardBody.innerHTML = `<p>Password Reset Successfully.</p><p>${actualName.value}'s new password is: <b>${password}</b></p>
+          <input id="resetPage" onclick="resetPage()" type="button" class="btn btn-success" href="#" value="Back">`; }
+          }
+      });
+
+      }
+
+  }
+
+}
+
+function resetPage() {
+  cardBody.innerHTML = `<div class="form-group">
+                          <label class="small mb-1" for="inputUser">Select User</label>
+                          <input autocomplete="off" required class="form-control" id="inputUser" type="text" placeholder="e.g. John Smith" value=""/>
+                          <input tabindex="-1" readonly style="margin-top:3px;border:0px;font-size:0.8rem" class="form-control" id="inputUser-id">
+                      </div>
+                      <div class="form-group">
+                          <label class="small mb-1" for="inputPassword">New Password</label>
+                          <input autocomplete="off" required class="form-control" id="inputPassword" type="password" placeholder="New Password" value=""/>
+                      </div>
+                      <div class="form-group">
+                          <label class="small mb-1" for="inputConfPassword">Confirm Password</label>
+                          <input autocomplete="off" required class="form-control" id="inputConfPassword" type="password" placeholder="Confirm Password" value=""/>
+                          <div class="invalid-feedback"></div>
+                      </div>
+                      <div class="form-check">
+                        <input type="checkbox" class="form-check-input" id="promptNextLogin">
+                        <label class="form-check-label small unselectable" for="promptNextLogin">Prompt user to change password on next login (this may not allow the user to login if connecting remotely). This setting will not work if your Administrator has configured the user password never to expire.</label>
+                      </div>
+                      <div class="form-group d-flex align-items-center justify-content-between mt-4 mb-0">
+                          <input id="resetPwBtn" onclick="resetPw()" type="button" class="btn btn-primary" href="#" value="Reset Password">&nbsp;&nbsp;
+                          <div id="invalid-feedback" class="invalid-feedback"></div>
+                      </div>`;
+                      loadAutocomplete();
+                      document.getElementById("inputConfPassword").addEventListener('keyup', function(event) {
+                          if(event.key == "Enter") { resetPw(); }
+                      });
+}
+
+function loadAutocomplete(){
+    api.allUsers(null,function(users){
+      var userList = "";
+      users.forEach(getUserInfo)
+      function getUserInfo(item,index) {
+        var displayName = item.displayName;
+        if(item.displayName == undefined) { displayName = item.cn; }; userList += `{ "value": "${item.sAMAccountName}", "label": "${displayName}", "status": "${item.userAccountControl}" },`
+      }
+      userList = JSON.parse("[" + userList.substring(0, userList.length - 1) + "]");
+
+  $("#inputUser").autocomplete({
+      minLength: 0,
+      source: function(request, response) {
+          var results = $.ui.autocomplete.filter(userList, request.term);
+          response(results.slice(0, 12));
+      },
+       focus: function( event, ui ) {
+         $( "#inputUser" ).val( ui.item.label );
+         $( "#inputUser-id" ).val( ui.item.value );
+         return false;
+       },
+      select: function( event, ui ) {
+        $( "#inputUser" ).val( ui.item.label );
+        $( "#inputUser-id" ).val( ui.item.value );
+        $( "#inputPassword").select();
+        return false;
+      }
+    })
+    .autocomplete( "instance" )._renderItem = function( ul, item ) {
+      return $( "<li>" )
+        .append( "<div class='mt-1'>" + item.label + "</div>" )
+        .appendTo( ul );
+    };
+  });
+}
+
+document.getElementById("inputUser").addEventListener('keydown', function(event) {
+    if(event.key == "Tab") { event.preventDefault(); $( "#inputPassword").select(); }
+});
+</script>

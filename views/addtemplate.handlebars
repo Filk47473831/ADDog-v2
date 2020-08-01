@@ -1,0 +1,337 @@
+  <main>
+    <div class="container-fluid">
+      <h3 class="mt-4">Add User Template</h3>
+      <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item"><a href="/">Dashboard</a></li>
+        <li class="breadcrumb-item active">Add User Template</li>
+      </ol>
+      <div class="col-sm-12 col-md-10 col-lg-8 col-xl-6">
+        <div class="card shadow-lg border-0 rounded-lg mt-2 mb-5">
+          <div id="card-body" class="card-body">
+                <h6 class="mb-3">Add a new user template to create users from</h6>
+                <div class="form-group">
+                  <label class="small mb-1" for="inputUserTemplateName">Template Name</label>
+                  <input autofocus required name="inputUserTemplateName" class="form-control" id="inputUserTemplateName" type="text" placeholder="e.g. Staff" value=""/>
+                </div>
+                <div class="form-group">
+                    <label class="small mb-1" for="inputUser">Create Template From User (Specify Username)</label>
+                    <input class="form-control" id="inputUser" type="text" placeholder="e.g. jsmith" value=""/>
+                    <input name="inputUser" type="hidden" id="inputUser-id">
+                </div>
+                <div class="form-group">
+                  <label class="small mb-1" for="inputUPNSuffix">UPN Suffix</label>
+                  <input name="inputUPNSuffix" class="form-control" id="inputUPNSuffix" type="text" placeholder="e.g. arunside.school" value=""/>
+                </div>
+                <div class="form-group">
+                  <label class="small mb-1" for="inputEmailAddress">Email Address</label>
+                  <input name="inputEmailAddress" class="form-control" id="inputEmailAddress" type="text" placeholder="e.g. %USERNAME%@arunside.school" value=""/>
+                </div>
+                <div class="form-group">
+                  <label class="small mb-1" for="inputHomeDirectory">Home Directory</label>
+                  <input name="inputHomeDirectory" class="form-control" id="inputHomeDirectory" type="text" placeholder="e.g. \\AS-DC\Staff$\%USERNAME%" value=""/>
+                </div>
+                <div class="form-group">
+                  <label class="small mb-1" for="inputHomeDrive">Home Drive Letter</label>
+                  <input name="inputHomeDrive" class="form-control" id="inputHomeDrive" type="text" placeholder="e.g. U" maxlength="1" value=""/>
+                </div>
+                <div class="form-group">
+                  <label class="small mb-1" for="inputProfilePath">Profile Path</label>
+                  <input name="inputProfilePath" class="form-control" id="inputProfilePath" type="text" placeholder="e.g. \\AS-DC\Profiles$\%USERNAME%" value=""/>
+                </div>
+                <div class="form-group">
+                  <label class="small mb-1" for="inputScriptPath">Logon Script</label>
+                  <input name="inputScriptPath" class="form-control" id="inputScriptPath" type="text" placeholder="e.g. Staff.bat" value=""/>
+                </div>
+                <div class="form-group">
+                  <label class="small mb-1" for="ouTree">Target OU</label>
+                  <div id="ouTree">
+                  </div>
+                  <input disabled style="border:0px" required class="form-control mt-3" name="inputUserOU" id="inputUserOU" value="" placeholder="Select target OU for new users">
+                </div>
+                <div class="form-group">
+                  <label class="small mb-1" for="inputGroupDN">Member Group Name's (1 Per Line)</label>
+                  <textarea name="inputGroupDN" class="form-control" id="inputGroupDN" type="text" rows="7" placeholder="e.g. Staff"></textarea>
+                </div>
+                <div class="form-group">
+                  <label class="small mb-1" for="inputUsernameFormat">Standard Username Format</label>
+                  <select class="form-control" name="inputUsernameFormat" id="inputUsernameFormat">
+                    <option value="1">jsmith</option>
+                    <option value="2">j.smith</option>
+                    <option value="3">john.smith</option>
+                    <option value="4">johnsmith</option>
+                    <option value="5">johns</option>
+                    <option value="6">john.s</option>
+                    <option value="7">smithj</option>
+                    <option value="8">smithjohn</option>
+                    <option value="9">smith.john</option>
+                    <option value="10">john</option>
+                    <option value="11">smith</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label class="small mb-1" for="authorisedUserVisibility">Authorised Users Template Visibility</label>
+                      <div id="authorisedUserVisibility"></div>
+                </div>
+                <div class="form-group d-flex align-items-center justify-content-between mt-4 mb-0">
+                  <input id="addUserTemplateBtn" onclick="addUserTemplate()" type="button" class="btn btn-success" href="#" value="Add User Template">&nbsp;&nbsp;
+                  <div id="invalid-feedback" class="invalid-feedback"></div>
+                </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+  <script src="js/apiquery.js"></script>
+  <script>
+
+const api = new API();
+getUserTemplates();
+readAuthorisedAdmins();
+var userTemplates = "";
+
+function getTemplateData(chosenTemplate){
+
+  try {
+    var inputUPNSuffix = document.getElementById("inputUPNSuffix");
+    var inputEmailAddress = document.getElementById("inputEmailAddress");
+    var inputHomeDirectory = document.getElementById("inputHomeDirectory");
+    var inputHomeDrive = document.getElementById("inputHomeDrive");
+    var inputProfilePath = document.getElementById("inputProfilePath");
+    var inputScriptPath = document.getElementById("inputScriptPath");
+    var inputGroupDN = document.getElementById("inputGroupDN");
+    var inputUserOU = document.getElementById("inputUserOU");
+    var inputUsernameFormat = document.getElementById("inputUsernameFormat");
+
+    inputUPNSuffix.value = userTemplates[chosenTemplate].upnSuffix;
+    inputEmailAddress.value = userTemplates[chosenTemplate].emailAddress;
+    inputHomeDirectory.value = userTemplates[chosenTemplate].homeDirectory;
+    inputHomeDrive.value = userTemplates[chosenTemplate].homeDrive;
+    inputProfilePath.value = userTemplates[chosenTemplate].profilePath;
+    inputScriptPath.value = userTemplates[chosenTemplate].scriptPath;
+    inputGroupDN.value = userTemplates[chosenTemplate].groupDN;
+    inputUserOU.value = userTemplates[chosenTemplate].userOU;
+    inputUsernameFormat.selectedIndex = userTemplates[chosenTemplate].usernameFormat -1;
+    var authorisedUsers = JSON.parse(userTemplates[chosenTemplate].authorised);
+
+    authorisedUsers.forEach(checkAuthorisedUserCheckBoxes);
+
+    function checkAuthorisedUserCheckBoxes(item, index) {
+      if(document.getElementById(item + "-check")) { document.getElementById(item + "-check").checked = true; }
+    }
+
+    document.getElementById("addUserTemplateBtn").value = "Update User Template";
+
+  }
+  catch (err) { document.getElementById("addUserTemplateBtn").value = "Add User Template"; }
+
+}
+
+function getUserTemplates() {
+  api.getUserTemplates(function(result) {
+      if(result == "" || result.startsWith("Error")) { userTemplates = ""; } else {
+      console.log("what")
+      result = JSON.parse(result)
+      userTemplates = result;
+    }
+  })
+}
+
+function lookupUser(username) {
+  api.lookupUser(username,function(response) {
+    if(response !== null) {
+      if(response.mail !== undefined) {
+        var mail = response.mail.split("@");
+        mail[0] = "%USERNAME%";
+        mail = mail.join("@");
+        document.getElementById("inputEmailAddress").value = mail;
+      }
+      if(response.homeDirectory !== undefined) {
+        var homeDirectory = response.homeDirectory.split("\\");
+        homeDirectory.pop();
+        homeDirectory = homeDirectory.join("\\");
+        document.getElementById("inputHomeDirectory").value = homeDirectory + "\\%USERNAME%";
+      }
+      if(response.homeDrive !== undefined) {
+        var homeDrive = response.homeDrive.charAt(0);
+        document.getElementById("inputHomeDrive").value = homeDrive;
+      }
+      if(response.scriptPath !== undefined) {
+        document.getElementById("inputScriptPath").value = response.scriptPath;
+      }
+      if(response.profilePath !== undefined) {
+        var profilePath = response.profilePath.split("\\");
+        profilePath.pop();
+        profilePath = profilePath.join("\\");
+        document.getElementById("inputProfilePath").value = profilePath + "\\%USERNAME%";
+      }
+      if(response.dn !== undefined) {
+        var dn = response.dn.split(",");
+        dn.shift();
+        dn = dn.join(",");
+        document.getElementById("inputUserOU").value = dn;
+      }
+      if(response.memberOf !== undefined) {
+        var memberOf = response.memberOf;
+        if(Array.isArray(memberOf)) { } else {
+          memberOf = [memberOf]
+        }
+        var items = [];
+        memberOf.forEach(getName);
+        document.getElementById("inputGroupDN").value = items.join("\r\n");
+        function getName(item, index){
+          item = item.split(",");
+          item = item[0].split("=");
+          item = item[1];
+          items.push(item);
+        }
+      }
+      if(response.userPrincipalName !== undefined) {
+        var upnSuffix = response.userPrincipalName.split("@")[1];
+        document.getElementById("inputUPNSuffix").value = upnSuffix;
+      }
+    }
+  })
+}
+
+function addUserTemplate() {
+
+  var invalidFeedbackMsg = document.getElementById("invalid-feedback");
+  var addUserTemplateBtn = document.getElementById("addUserTemplateBtn");
+  var inputUserTemplateName = document.getElementById("inputUserTemplateName");
+  var inputUPNSuffix = document.getElementById("inputUPNSuffix");
+  var inputEmailAddress = document.getElementById("inputEmailAddress");
+  var inputHomeDirectory = document.getElementById("inputHomeDirectory");
+  var inputHomeDrive = document.getElementById("inputHomeDrive");
+  var inputProfilePath = document.getElementById("inputProfilePath");
+  var inputScriptPath = document.getElementById("inputScriptPath");
+  var inputUserOU = document.getElementById("inputUserOU");
+  var inputGroupDN = document.getElementById("inputGroupDN");
+  var inputUsernameFormat = document.getElementById("inputUsernameFormat");
+  var cardBody = document.getElementById("card-body");
+  var authorisedUsers = [];
+  $("input:checkbox[name=authorisedUser]:checked").each(function(){
+    authorisedUsers.push($(this).val());
+  });
+
+  addUserTemplateBtn.setAttribute("disabled","disabled");
+
+  if(inputUserOU.value == "") {
+
+    if(inputUserOU.value == "") {
+        inputUserOU.classList.add("is-invalid"); addUserTemplateBtn.classList.add("is-invalid"); invalidFeedbackMsg.innerHTML = "Missing Fields"; } else { inputUserOU.classList.remove("is-invalid"); }
+
+    addUserTemplateBtn.removeAttribute("disabled");
+
+    } else {
+
+    var data = {
+        userTemplateName:inputUserTemplateName.value,
+        upnSuffix:inputUPNSuffix.value,
+        emailAddress:inputEmailAddress.value,
+        homeDirectory:inputHomeDirectory.value,
+        homeDrive:inputHomeDrive.value,
+        profilePath:inputProfilePath.value,
+        scriptPath:inputScriptPath.value,
+        userOU:inputUserOU.value,
+        groupDN:inputGroupDN.value,
+        usernameFormat:inputUsernameFormat.value,
+        authorised: JSON.stringify(authorisedUsers)
+      }
+
+    data = btoa(JSON.stringify(data));
+
+    api.addUserTemplate(data,function(result){
+      window.scrollTo(0,0);
+      cardBody.innerHTML = `<p>${inputUserTemplateName.value} user template has been added/updated successfully</p>
+        <input id="resetPage" onclick="window.location.href='addtemplate'" type="button" class="btn btn-success" href="#" value="Back">`;
+    })
+
+  }
+
+}
+
+api.ouTree(function(outree){
+  var ouTreeList = `<ul><li class="jstree-open">Organizational Units<ul>`;
+  outree.forEach(element => ouTreeList += `<li value="${element.dn}">${element.name}</li>`)
+  ouTreeList = ouTreeList + `</ul></li></ul>`;
+  $('#ouTree').html(ouTreeList)
+  $('#ouTree').jstree()
+  $('#ouTree').on('changed.jstree', function (e, data) {
+      var i, j, r = [];
+      for(i = 0, j = data.selected.length; i < j; i++) {
+        r.push(data.instance.get_node(data.selected[i]).li_attr.value);
+      }
+      document.getElementById("inputUserOU").value = r.join(', ');
+  })
+})
+
+  $( function() {
+    var users = "";
+
+    $("#inputUser").autocomplete({
+      minLength: 0,
+      source: users,
+      focus: function( event, ui ) {
+        $( "#inputUser" ).val( ui.item.label );
+        return false;
+      },
+      select: function( event, ui ) {
+        $( "#inputUser" ).val( ui.item.label );
+        $( "#inputUser-id" ).val( ui.item.value );
+        return false;
+      }
+    })
+    .autocomplete( "instance" )._renderItem = function( ul, item ) {
+      return $( "<li>" )
+        .append( "<div class='mt-1'>" + item.label + "</div>" )
+        .appendTo( ul );
+    };
+  } );
+
+document.getElementById("inputUser").addEventListener("focusout", function() {
+  lookupUser(document.getElementById("inputUser").value);
+});
+
+$(function () { $('#authUserOUTree').jstree({
+    "checkbox" : {
+      "keep_selected_style" : false
+    },
+    "plugins" : [ "checkbox" ]
+  });
+});
+
+function readAuthorisedAdmins(){
+  api.readLoginUsers(function(result){
+    if(result == "{}") { document.getElementById("authorisedUserVisibility").innerHTML = "<small>No Authorised Users</small>"; } else {
+    result = JSON.parse(result)
+    var response = "";
+    for (var key of Object.keys(result)) {
+      response += `<div style="padding-left:30px" class="form-check">
+                  <label><input id="${result[key].username}-check" class="form-check-input" type="checkbox" name="authorisedUser" value="${result[key].username}">${result[key].username}</label>
+                </div>`
+    }
+    document.getElementById("authorisedUserVisibility").innerHTML = response;
+  }
+  })
+}
+
+$('#ouTree').on('changed.jstree', function (e, data) {
+    var i, j, r = [];
+    for(i = 0, j = data.selected.length; i < j; i++) {
+      r.push(data.instance.get_node(data.selected[i]).li_attr.value);
+    }
+    document.getElementById("inputUserOU").value = r.join(', ');
+  });
+
+  document.getElementById("inputUserTemplateName").addEventListener("focusout", function() {
+    if(document.getElementById("inputUserTemplateName").value !== "") {
+      getTemplateData(document.getElementById("inputUserTemplateName").value);
+    }
+  });
+
+  document.getElementById("inputUserTemplateName").addEventListener("change", function() {
+    if(document.getElementById("inputUserTemplateName").value !== "") {
+      getTemplateData(document.getElementById("inputUserTemplateName").value);
+    }
+  });
+</script>

@@ -1,0 +1,311 @@
+<main>
+    <div class="container-fluid">
+        <h3 class="mt-4">Bulk Add Users</h3>
+        <ol class="breadcrumb mb-4">
+            <li class="breadcrumb-item"><a href="/">Dashboard</a></li>
+            <li class="breadcrumb-item active">Bulk Add Users</li>
+        </ol>
+            <div id="addBulkUsersDiv" class="col-sm-12 col-md-10 col-lg-8 col-xl-6">
+            <div class="card shadow-lg border-0 rounded-lg mt-2">
+                <div id="addBulkUsersForm" class="card-body">
+                  <h6 class="mb-3">Add multiple new users to the network in the selected organizational unit</h6>
+                    <div class="form-group">
+                        <label class="small mb-1" for="inputUserTemplate">Select User Template</label>
+                        <select id="inputUserTemplate" class="form-control"></select>
+                    </div>
+                    <div class="form-group">
+                      <label class="small mb-1" for="ouTree">Target OU</label>
+                      <div id="ouTree"></div>
+                      <input required style="border:0px" required class="form-control mt-3" id="inputUserOU" value="" placeholder="Select target OU for new users">
+                    </div>
+                    <div class="form-group">
+                      <label class="small mb-1" for="bulkUsersFile">Users CSV</label>
+                      <input name="csv" accept=".txt,.csv" type="file" class="small form-control-file" id="bulkUsersFile">
+                      <p class="small mt-2">One user per row. Each row must contain comma separated values for first name, last name, username and desired password. In that order. Max 100 users.</p>
+                    </div>
+                    <div class="form-group">
+                      <textarea required class="form-control" id="bulkUsersInput" type="text" rows="10" placeholder="e.g. Chris,Groves,cgroves,Password1234"></textarea>
+                    </div>
+                    <div class="form-group d-flex align-items-center justify-content-between mt-4 mb-0">
+                      <input id="addBulkUsersBtn" onclick="addBulkUsers()" type="button" class="btn btn-success" href="#" value="Add Bulk Users">&nbsp;&nbsp;
+                      <div id="invalid-feedback" class="invalid-feedback">Invalid Users Found</div>
+                    </div>
+                </div>
+            </div>
+            </div>
+    </div>
+</main>
+<script src="js/apiquery.js"></script>
+<script>
+
+const api = new API();
+getUserTemplates();
+var users = "";
+var user = "";
+var userTemplate = "";
+var userOU = "";
+var inputUPNSuffix = "";
+var inputEmailAddress = "";
+var inputHomeDirectory = "";
+var inputHomeDrive = "";
+var inputProfilePath = "";
+var inputScriptPath = "";
+var inputGroupDN = "";
+var inputUserOU = "";
+var cardBody = document.getElementById("addBulkUsersForm");
+
+function isEmpty(obj) {
+  for(var key in obj) {
+      if(obj.hasOwnProperty(key))
+          return false;
+  }
+  return true;
+}
+
+api.ouTree(function(outree){
+  var ouTreeList = `<ul><li class="jstree-open">Organizational Units<ul>`;
+  outree.forEach(element => ouTreeList += `<li value="${element.dn}">${element.name}</li>`)
+  ouTreeList = ouTreeList + `</ul></li></ul>`;
+  $('#ouTree').html(ouTreeList)
+  $('#ouTree').jstree()
+  $('#ouTree').on('changed.jstree', function (e, data) {
+      var i, j, r = [];
+      for(i = 0, j = data.selected.length; i < j; i++) {
+        r.push(data.instance.get_node(data.selected[i]).li_attr.value);
+      }
+      document.getElementById("inputUserOU").value = r.join(', ');
+  })
+})
+
+function getTemplateData(chosenTemplate){
+  document.getElementById("inputUserOU").value = userTemplates[chosenTemplate].userOU;
+  inputUPNSuffix = userTemplates[chosenTemplate].upnSuffix;
+  inputEmailAddress = userTemplates[chosenTemplate].emailAddress;
+  inputHomeDirectory = userTemplates[chosenTemplate].homeDirectory;
+  inputHomeDrive = userTemplates[chosenTemplate].homeDrive;
+  inputProfilePath = userTemplates[chosenTemplate].profilePath;
+  inputScriptPath = userTemplates[chosenTemplate].scriptPath;
+  inputGroupDN = userTemplates[chosenTemplate].groupDN;
+  inputGroupDN = inputGroupDN.split("\n")
+  inputUserOU = userTemplates[chosenTemplate].userOU;
+
+}
+
+function getUserTemplates() {
+  api.getUserTemplates(function(result) {
+      if(result == "") { window.location.href = "addtemplate"; }
+      result = JSON.parse(result)
+      userTemplates = result;
+      if(isEmpty(result)) { window.location.href = "addtemplate"; }
+      for (const key of Object.keys(result)) {
+          document.getElementById("inputUserTemplate").innerHTML += "<option value='" + result[key].userTemplateName + "'>" + result[key].userTemplateName + "</option>";
+      }
+      getTemplateData(Object.keys(userTemplates)[0])
+  })
+}
+
+async function addBulkUsers(){
+
+  var error = false;
+  userTemplate = document.getElementById("inputUserTemplate").value;
+  userOU = document.getElementById("inputUserOU").value;
+
+  users = document.getElementById("bulkUsersInput").value;
+  users = users.split("\n");
+
+  if(users.length < 100) {
+      for(i = 0; i < users.length; i++) {
+        if(users[i] == "") {
+          error = "Invalid Users Found";
+        } else {
+
+          if(users[i].indexOf(",") !== -1) {
+            user = users[i].split(",");
+            if(user.length == 4) {
+            for(j = 0; j < users[i].length; j++) {
+              if(user[j] == "") {
+                error = "Invalid Users Found";
+              }
+            }
+          } else { error = "Invalid Users Found"; }
+          }
+
+        }
+      }
+  } else {
+      error = "Too Many Users (Max 100)";
+    }
+
+if(error == false) {
+
+    document.getElementById("addBulkUsersDiv").setAttribute("class", "col-12");
+    var output =
+    `<table width="100%" class="table table-striped table-borderless table-hover small" id="dataTable-bulkUsers">
+            <thead>
+                <tr>
+                    <th scope="col" class="d-none d-sm-table-cell">Name</th>
+                    <th>Username</th>
+                    <th>Password</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>`;
+
+            users.forEach(function(user, index) {
+
+            user = user.split(",");
+
+    output +=
+            `<tr id="${user[2]}-row" class="odd gradeX">
+                    <td scope="col" class="d-none d-sm-table-cell">${user[0]} ${user[1]}</td>
+                    <td>${user[2]}</td>
+                    <td>${user[3]}</td>
+                    <td id="${user[2]}-status">...</td>
+                  </tr>`;
+
+                })
+
+  output +=
+            `</tbody>
+    </table>`;
+
+    cardBody.innerHTML = output;
+
+    cardBody.innerHTML += `<input disabled id="bulkUsersBackBtn" onclick="location.reload()" type="button" class="btn btn-primary" href="#" value="Back">`;
+    drawTable();
+
+    processArray(users);
+
+    async function processArray(users) {
+       for (const [index, user] of users.entries()) {
+         await addUser(user)
+       }
+
+     enableTableBtns();
+     document.getElementById("bulkUsersBackBtn").removeAttribute("disabled")
+     }
+
+    } else {
+      document.getElementById("addBulkUsersBtn").classList.add("is-invalid");
+      document.getElementById("bulkUsersInput").classList.add("is-invalid");
+      document.getElementById("invalid-feedback").innerText = error;
+    }
+
+}
+
+function drawTable() {
+  $('#dataTable-bulkUsers').dataTable( {
+    "pageLength": 100,
+    "sPaginationType": "listbox",
+    dom: 'Bfrtip',
+    buttons: {
+          buttons: [
+              { extend: 'copy', className: 'disabled btn btn-primary btn-sm' },
+              { extend: 'csv', className: 'disabled btn btn-primary btn-sm' },
+              { extend: 'excel', className: 'disabled btn btn-primary btn-sm' },
+              { extend: 'pdf', className: 'disabled btn btn-primary btn-sm' },
+              { extend: 'print', className: 'disabled btn btn-primary btn-sm' }
+          ]
+      }
+  } );
+}
+
+function enableTableBtns() {
+  $('#dataTable-bulkUsers').DataTable().buttons().enable();
+}
+
+async function addUser(user) {
+
+  return new Promise(resolve => {
+
+  user = user.split(",");
+
+  var inputFirstName = user[0];
+  var inputLastName = user[1];
+  var actualName = user[0] + " " + user[1];
+  var username = user[2];
+  var inputPassword = user[3];
+  var ou = inputUserOU;
+  var originalPassword = inputPassword;
+  var password = '{"unicodePwd":"' + originalPassword + '"}';
+
+    var data = {
+      objectClass:"User",
+      userAccountControl:"66080",
+      displayName:inputFirstName + " " + inputLastName,
+      userPrincipalName:username + "@" + inputUPNSuffix,
+      givenName:inputFirstName,
+      sn:inputLastName,
+      mail:inputEmailAddress.replace(/%USERNAME%/gi, username),
+      sAMAccountName:username,
+      proxyAddresses:"SMTP:" + inputEmailAddress.replace(/%USERNAME%/gi, username),
+      homeDirectory:inputHomeDirectory.replace(/%USERNAME%/gi, username),
+      profilePath:inputProfilePath.replace(/%USERNAME%/gi, username),
+      scriptPath:inputScriptPath,
+      homeDrive:inputHomeDrive
+    }
+
+     data = btoa(JSON.stringify(data));
+
+      api.addUser(ou,data, function(result){
+
+        if(result !== null) {
+          if(result !== "Success") {
+            document.getElementById(username + "-status").innerText = result;
+            document.getElementById(username + "-row").style.backgroundColor = "#edd8d8";
+            resolve("Done with error")
+          } else {
+            api.modifyUser(username,password, function(result){
+              inputGroupDN.forEach(function(group){
+                api.addUserToGroup(username,group,function(result){
+                  if(result == "Success") {
+                    document.getElementById(username + "-status").innerText = "Added Successfully";
+                    document.getElementById(username + "-row").style.backgroundColor = "#ddedd8";
+                  } else {
+                    document.getElementById(username + "-status").innerText = result;
+                    document.getElementById(username + "-row").style.backgroundColor = "#edd8d8";
+                  }
+                })
+              })
+            })
+          resolve("Done")
+          }
+
+        } else {
+          document.getElementById(username + "-status").innerText = result;
+          document.getElementById(username + "-row").style.backgroundColor = "#edd8d8";
+          resolve("Done with error")
+        }
+
+      })
+
+    })
+
+    }
+
+document.getElementById("inputUserTemplate").addEventListener("change", function() {
+    getTemplateData(document.getElementById("inputUserTemplate").value);
+});
+
+document.getElementById("bulkUsersFile").addEventListener("change", function(){
+  var file = document.getElementById("bulkUsersFile").files[0];
+  if(file) {
+    if(file.type === "text/plain" || file.name.endsWith('.csv')) {
+      var reader = new FileReader();
+      reader.onload = function(progressEvent){
+        var lines = this.result.split('\n');
+        var res = "";
+        for(var line = 0; line < lines.length; line++){
+          if(lines.length - line > 1) {
+            res += lines[line] + "\n";
+          } else {
+            res += lines[line]
+          }
+        }
+        document.getElementById("bulkUsersInput").value = res;
+      };
+      reader.readAsText(file);
+    }
+  }
+});
+</script>
