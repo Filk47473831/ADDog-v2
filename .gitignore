@@ -1,4 +1,5 @@
-
+package.json
+package-lock.json
 git/bin/bash.exe
 git/bin/git.exe
 git/bin/sh.exe
@@ -15474,3 +15475,4 @@ settings/templates.data
 settings/settings.data
 debug.log
 activity.log
+nssm.exe
