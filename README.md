@@ -6,4 +6,4 @@ Built with NodeJS and Javascript
 
 Brought to you by:
 <br>
-<img style="max-height:25px" src="https://sc.dog/includes/logo.png">
+<img style="height:25px" src="https://sc.dog/includes/logo.png">
