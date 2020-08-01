@@ -6,6 +6,7 @@ nssm.exe
 settings/users.data
 settings/templates.data
 settings/settings.data
+nodejs/*
 git/bin/bash.exe
 git/bin/git.exe
 git/bin/sh.exe
