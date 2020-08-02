@@ -1042,7 +1042,7 @@ try {
     ret(null);
   }
 
-} else { ret("Error modifying user: Unauthorised"); }
+} else { logError("Error modifying user: Unauthorised"); ret("Error modifying user: Unauthorised"); }
 
 })
 
@@ -1053,6 +1053,8 @@ try {
 }
 
 function modifyUser(req,ret) {
+
+  logError("Modify User: " + req.query.username + " - " + req.query.data);
 
   var username = req.query.username
   var data = req.query.data
