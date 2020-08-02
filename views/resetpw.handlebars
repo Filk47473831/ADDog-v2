@@ -94,6 +94,8 @@ function resetPw() {
 
       api.modifyUser(username,data, function(result){
 
+        console.log(result);
+
         if(result == "No results for lookup") {
           resetPwBtn.classList.add("is-invalid");
           actualName.classList.add("is-invalid");
