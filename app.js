@@ -46,6 +46,7 @@ try {
 
 var settingsApplied = false;
 var client = "";
+var domainPassword = "";
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -123,13 +124,12 @@ connect(inputUsername + "@" + inputDomain, inputPassword, function(result){
 
   try {
     writeSettingsFile(settings, function(){
-      res.redirect('/');
 
-      var cmd = `net stop ADDog "&" net start ADDog`;
-        executePowershell(cmd,function(result) {
-          logError("Restarted Service")
+      keytar.getPassword(settings.Settings.account,settings.Settings.domainUsername + '@' + settings.Settings.domainFQDN).then(function(result) {
+        domainPassword = result;
       });
 
+      res.redirect('/');
     });
   } catch (err) {
     logError("Error saving settings: " + err)
