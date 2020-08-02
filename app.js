@@ -216,7 +216,7 @@ function approvedOu(req,ou,ret) {
   var approvedOus = req.session.distinguishedNames
 
   logError("Approved: " + req.session.distinguishedNames)
-  
+
   ou = ou.split(",")
   ou.shift()
   ou = ou.toString();
@@ -224,7 +224,7 @@ function approvedOu(req,ou,ret) {
 logError("Approved: " + ou)
 
   approvedOus.forEach(function(approvedOu){
-    if(ou.endsWith(approvedOu)) { logError("Approved: " + approvedOu); ret("Approved"); }
+    if(ou.toLowerCase().endsWith(approvedOu.toLowerCase())) { logError("Approved: " + approvedOu); ret("Approved"); }
   })
 } catch (err) {
   logError(err)
