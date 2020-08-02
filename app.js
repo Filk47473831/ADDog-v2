@@ -408,7 +408,7 @@ app.get("/deluser", function(req, res) {
 
 app.get("/modifyuser", function(req, res) {
 
-  logError("Modifying User: " + req)
+  logError("Modifying User: " + JSON.stringify(req))
 
   try {
 
@@ -428,6 +428,9 @@ app.get("/modifyuser", function(req, res) {
               if(!req.query.data) {
                 res.send("Missing URL argument 'Data'");
             } else {
+
+              logError("Modifying User: " + JSON.stringify(req))
+
               modifyUser(req,function(result){
                 logError("Modifying User: " + result)
                 if(result == "Success") { res.send("Success") } else { res.send(result) }
@@ -1056,6 +1059,7 @@ function modifyUser(req,ret) {
 
 lookupUser(username,function(user) {
     if(user == null) {
+      logError("Modify User: No results for lookup");
       ret("No results for lookup");
     } else {
       dn = user.dn;
