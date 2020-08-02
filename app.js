@@ -124,7 +124,12 @@ connect(inputUsername + "@" + inputDomain, inputPassword, function(result){
   try {
     writeSettingsFile(settings, function(){
       res.redirect('/');
-      executeCommand('net stop "addog" && net start "addog"');
+
+      var cmd = `nssm restart ADDog`;
+        executePowershell(cmd,function(result) {
+          logError("Restarted Service")
+      });
+
     });
   } catch (err) {
     logError("Error saving settings: " + err)
