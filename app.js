@@ -211,6 +211,7 @@ function isAdmin(req){
 }
 
 function approvedOu(req,ou,ret) {
+  logError("Approved: " + req)
   try {
   var approvedOus = req.session.distinguishedNames
   ou = ou.split(",")
@@ -1069,6 +1070,7 @@ lookupUser(username,function(user) {
       logError("Modify User: " + dn);
 
       approvedOu(req,dn,function(result){
+        logError("Approved: " + result)
         if(result == "Approved") {
 
           data = Buffer.from(data, 'base64');
