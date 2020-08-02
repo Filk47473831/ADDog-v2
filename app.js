@@ -408,6 +408,8 @@ app.get("/deluser", function(req, res) {
 
 app.get("/modifyuser", function(req, res) {
 
+  logError("Modifying User: " + req)
+
   try {
 
   connect(settings.Settings.domainUsername + '@' + settings.Settings.domainFQDN,domainPassword,function(connection){
@@ -427,7 +429,7 @@ app.get("/modifyuser", function(req, res) {
                 res.send("Missing URL argument 'Data'");
             } else {
               modifyUser(req,function(result){
-                errorLog("Modifying User: " + result)
+                logError("Modifying User: " + result)
                 if(result == "Success") { res.send("Success") } else { res.send(result) }
               });
             }
