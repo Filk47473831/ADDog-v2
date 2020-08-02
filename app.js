@@ -427,6 +427,7 @@ app.get("/modifyuser", function(req, res) {
                 res.send("Missing URL argument 'Data'");
             } else {
               modifyUser(req,function(result){
+                errorLog("Modifying User: " + result)
                 if(result == "Success") { res.send("Success") } else { res.send(result) }
               });
             }
