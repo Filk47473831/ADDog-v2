@@ -247,7 +247,7 @@ app.get('/exportbulkusers', requireLogin, (req, res) => { renderLayout(req,res,'
 app.get('/disableuser', requireLogin, (req, res) => { renderLayout(req,res,'disableuser') });
 app.get('/editsettings', requireLogin_noAuth, (req, res) => { renderLayout(req,res,'editsettings') });
 app.get('/edituser', requireLogin, (req, res) => { renderLayout(req,res,'edituser') });
-app.get('/activity', requireLogin, (req, res) => { renderLayout(req,res,'main') });
+app.get('/activity', requireLogin, (req, res) => { renderLayout(req,res,'activity') });
 app.get('/resetprintqueue', requireLogin, (req, res) => { renderLayout(req,res,'resetprintqueue') });
 app.get('/resetpwbulk', requireLogin, (req, res) => { renderLayout(req,res,'resetpwbulk') });
 app.get('/addbulkusers', requireLogin, (req, res) => { if(fs.readFileSync('settings/templates.data') != "{}") { renderLayout(req,res,'addbulkusers') } else { renderLayout(req,res,'addtemplate') } });
