@@ -408,7 +408,7 @@ app.get("/deluser", function(req, res) {
 
 app.get("/modifyuser", function(req, res) {
 
-  logError("Modifying User: " + JSON.stringify(req))
+  logError("Modifying User: " + req)
 
   try {
 
@@ -429,7 +429,7 @@ app.get("/modifyuser", function(req, res) {
                 res.send("Missing URL argument 'Data'");
             } else {
 
-              logError("Modifying User: " + JSON.stringify(req))
+              logError("Modifying User: " + req)
 
               modifyUser(req,function(result){
                 logError("Modifying User: " + result)
