@@ -2,7 +2,7 @@
  
 Active Directory User Management Application
 
-Built with NodeJS and Javascript and Dogs
+Built with NodeJS, Javascript and Dogs
 
 Brought to you by:
 <br>
