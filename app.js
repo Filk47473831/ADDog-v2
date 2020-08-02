@@ -1066,6 +1066,8 @@ lookupUser(username,function(user) {
     } else {
       dn = user.dn;
 
+      logError("Modify User: " + dn);
+
       approvedOu(req,dn,function(result){
         if(result == "Approved") {
 

@@ -285,7 +285,7 @@ function updateApp(){
 
   api.updateApp(function(result){
       window.scrollTo(0,0);
-      if(result.includes('Already up to date.')) { document.getElementById("updateStatus").innerHTML = "No new updates available"; } else { result = result.substring(100); document.getElementById("updateStatus").innerHTML = result; }
+      if(result.includes('Already up to date.')) { document.getElementById("updateStatus").innerHTML = "No new updates available"; } else { result = result.substring(104); document.getElementById("updateStatus").innerHTML = result; }
       document.getElementById("updateApp").innerHTML = 'Check for updates';
       document.getElementById("updateApp").setAttribute("onclick", "updateApp()");
       document.getElementById("updateApp").removeAttribute("disabled");
