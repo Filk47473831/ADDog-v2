@@ -10,12 +10,12 @@ Brought to you by:
 
 Screenshots:
 <br>
-<img style="border:2px;height:80px" src="https://sc.dog/includes/images/addog.jpg">
+<img style="border-radius: 8px;height:80px" src="https://sc.dog/includes/images/addog.jpg">
 <br>
-<img style="border:2px;height:80px" src="https://sc.dog/includes/images/addog1.jpg">
+<img style="border-radius: 8px;height:80px" src="https://sc.dog/includes/images/addog1.jpg">
 <br>
-<img style="border:2px;height:80px" src="https://sc.dog/includes/images/addog2.jpg">
+<img style="border-radius: 8px;height:80px" src="https://sc.dog/includes/images/addog2.jpg">
 <br>
-<img style="border:2px;height:80px" src="https://sc.dog/includes/images/addog3.jpg">
+<img style="border-radius: 8px;height:80px" src="https://sc.dog/includes/images/addog3.jpg">
 <br>
-<img style="border:2px;height:80px" src="https://sc.dog/includes/images/addog4.jpg">
+<img style="border-radius: 8px;height:80px" src="https://sc.dog/includes/images/addog4.jpg">
