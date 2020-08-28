@@ -240,9 +240,12 @@
       if(inputScriptPath.value != "") { data.scriptPath = inputScriptPath.value }
       if(inputHomeDrive.value != "") { data.homeDrive = inputHomeDrive.value }
 
-      data = btoa(JSON.stringify(data));
+		console.log(JSON.stringify(data));
 
+      data = btoa(JSON.stringify(data));
+	  
         api.addUser(ou,data, function(result){
+
 
           if(result.startsWith("Error")) {
             addUserBtn.classList.add("is-invalid");
@@ -250,15 +253,30 @@
             inputPassword.classList.add("is-invalid");
             inputConfPassword.classList.add("is-invalid");
             invalidFeedbackMsg.innerHTML = result;
+			
+			addUserBtn.removeAttribute("disabled");
           }
 
           if(result == "Success") {
 
             api.modifyUser(username,password, function(result){
+				
+				console.log(result);
+				
               inputGroupDN = inputGroupDN.value.split("\n")
               inputGroupDN.forEach(function(group){
                 api.addUserToGroup(username,group,function(result){ })
               })
+			  
+			     if(result.startsWith("Error")) {
+					addUserBtn.classList.add("is-invalid");
+					inputUser.classList.add("is-invalid");
+					inputPassword.classList.add("is-invalid");
+					inputConfPassword.classList.add("is-invalid");
+					invalidFeedbackMsg.innerHTML = result;
+									
+					addUserBtn.removeAttribute("disabled");
+				  }
 
               if(result == "Success") {
                 window.scrollTo(0,0);
