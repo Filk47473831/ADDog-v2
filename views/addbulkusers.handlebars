@@ -228,22 +228,25 @@ async function addUser(user) {
   var ou = inputUserOU;
   var originalPassword = inputPassword;
   var password = '{"unicodePwd":"' + originalPassword + '"}';
+	
+	  var data = {}
 
-    var data = {
-      objectClass:"User",
-      userAccountControl:"66080",
-      displayName:inputFirstName + " " + inputLastName,
-      userPrincipalName:username + "@" + inputUPNSuffix,
-      givenName:inputFirstName,
-      sn:inputLastName,
-      mail:inputEmailAddress.replace(/%USERNAME%/gi, username),
-      sAMAccountName:username,
-      proxyAddresses:"SMTP:" + inputEmailAddress.replace(/%USERNAME%/gi, username),
-      homeDirectory:inputHomeDirectory.replace(/%USERNAME%/gi, username),
-      profilePath:inputProfilePath.replace(/%USERNAME%/gi, username),
-      scriptPath:inputScriptPath,
-      homeDrive:inputHomeDrive
-    }
+      data.objectClass = "User";
+	  data.userAccountControl = "66080";
+	  
+      if(inputFirstName != "" && inputLastName != "") { data.displayName = inputFirstName + " " + inputLastName } else { data.displayName = inputFirstName }
+      if(username != "" && inputUPNSuffix != "") { data.userPrincipalName = username + "@" + inputUPNSuffix } else { data.userPrincipalName = username }
+      if(inputFirstName != "") { data.givenName = inputFirstName }
+      if(inputLastName != "") { data.sn = inputLastName }
+      if(inputEmailAddress != "") { data.mail = inputEmailAddress.value.replace(/%USERNAME%/gi, username) }
+      if(username != "") { data.sAMAccountName = username }
+      if(inputEmailAddress != "") { data.proxyAddresses = "SMTP:" + inputEmailAddress.replace(/%USERNAME%/gi, username); }
+      if(inputHomeDirectory != "") { data.homeDirectory = inputHomeDirectory.replace(/%USERNAME%/gi, username); }
+      if(inputProfilePath != "") { data.profilePath = inputProfilePath }
+      if(inputScriptPath != "") { data.scriptPath = inputScriptPath }
+      if(inputHomeDrive != "") { data.homeDrive = inputHomeDrive }
+
+	console.log(JSON.stringify(data));
 
      data = btoa(JSON.stringify(data));
 
