@@ -108,7 +108,7 @@ async function addBulkUsers(){
 
   var error = false;
   userTemplate = document.getElementById("inputUserTemplate").value;
-  userOU = document.getElementById("inputUserOU").value;
+  inputUserOU = document.getElementById("inputUserOU").value;
 
   users = document.getElementById("bulkUsersInput").value;
   users = users.split("\n");
@@ -231,7 +231,7 @@ async function addUser(user) {
 
 	  var data = {}
 
-      data.objectClass = "User";
+    data.objectClass = "User";
 	  data.userAccountControl = "66080";
 
       if(inputFirstName != "" && inputLastName != "") { data.displayName = inputFirstName + " " + inputLastName } else { data.displayName = inputFirstName }
@@ -245,8 +245,6 @@ async function addUser(user) {
       if(inputProfilePath != "") { data.profilePath = inputProfilePath }
       if(inputScriptPath != "") { data.scriptPath = inputScriptPath }
       if(inputHomeDrive != "") { data.homeDrive = inputHomeDrive }
-
-	console.log(JSON.stringify(data));
 
      data = btoa(JSON.stringify(data));
 
