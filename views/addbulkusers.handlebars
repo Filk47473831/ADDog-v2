@@ -228,17 +228,17 @@ async function addUser(user) {
   var ou = inputUserOU;
   var originalPassword = inputPassword;
   var password = '{"unicodePwd":"' + originalPassword + '"}';
-	
+
 	  var data = {}
 
       data.objectClass = "User";
 	  data.userAccountControl = "66080";
-	  
+
       if(inputFirstName != "" && inputLastName != "") { data.displayName = inputFirstName + " " + inputLastName } else { data.displayName = inputFirstName }
       if(username != "" && inputUPNSuffix != "") { data.userPrincipalName = username + "@" + inputUPNSuffix } else { data.userPrincipalName = username }
       if(inputFirstName != "") { data.givenName = inputFirstName }
       if(inputLastName != "") { data.sn = inputLastName }
-      if(inputEmailAddress != "") { data.mail = inputEmailAddress.value.replace(/%USERNAME%/gi, username) }
+      if(inputEmailAddress != "") { data.mail = inputEmailAddress.replace(/%USERNAME%/gi, username) }
       if(username != "") { data.sAMAccountName = username }
       if(inputEmailAddress != "") { data.proxyAddresses = "SMTP:" + inputEmailAddress.replace(/%USERNAME%/gi, username); }
       if(inputHomeDirectory != "") { data.homeDirectory = inputHomeDirectory.replace(/%USERNAME%/gi, username); }
