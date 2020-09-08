@@ -262,6 +262,7 @@ function hideResetModal() {
 }
 
 api.ouTree(function(outree){
+  console.log(outree);
   var ouTreeList = `<ul><li class="jstree-open">Organizational Units<ul>`;
   outree.forEach(element => ouTreeList += `<li value="${element.dn}">${element.name}</li>`)
   ouTreeList = ouTreeList + `</ul></li></ul>`;
