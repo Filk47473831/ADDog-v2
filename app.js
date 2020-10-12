@@ -146,7 +146,7 @@ connect(inputUsername + "@" + inputDomain, inputPassword, function(result){
 
 app.post('/login',function(req, res){
 
-    var username = req.body.username;
+    var username = req.body.username.toLowerCase();
     var password = req.body.password;
 
     if(username == "") { username = "null" }
