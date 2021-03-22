@@ -135,6 +135,7 @@
     api.getUserTemplates(function(result) {
         if(result.startsWith("Error")) { window.location.href = "addtemplate"; } else {
         if(isEmpty(result)) { window.location.href = "addtemplate"; }
+	console.log(result)
         result = JSON.parse(result)
         userTemplates = result;
         for (const key of Object.keys(result)) {
