@@ -129,7 +129,7 @@ function getTemplateData(chosenTemplate){
 function getUserTemplates() {
   api.getUserTemplates(function(result) {
       if(result == "" || result.startsWith("Error")) { userTemplates = ""; } else {
-      console.log("what")
+      console.log(result)
       result = JSON.parse(result)
       userTemplates = result;
     }
