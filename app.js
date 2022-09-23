@@ -611,7 +611,7 @@ app.get("/allusers", function(req, res) {
         } else { res.redirect('/'); }
       }
 
-  } else { res.send("Disconnected") }
+  }
 
       })
 
@@ -710,7 +710,7 @@ app.get("/allusers", function(req, res) {
         } else { res.redirect('/'); }
       }
 
-      } else { res.send("Disconnected") }
+      }
 
       })
 
@@ -768,7 +768,7 @@ app.get("/allusers", function(req, res) {
           } else { res.redirect('/'); }
         }
 
-        } else { res.send("Disconnected") }
+        }
 
         })
 
