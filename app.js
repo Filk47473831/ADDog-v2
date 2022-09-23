@@ -699,9 +699,9 @@ app.get("/allusers", function(req, res) {
                 res.send("Error getting templates")
               } else {
                 var parsedResult = JSON.parse(result);
-                for (const key of Object.keys(parsedResult)) {
-                    if(parsedResult[key].authorised.includes(req.session.username) || req.session.username.toLowerCase() == settings.Settings.domainUsername.toLowerCase()) { } else { delete parsedResult[key]; }
-                }
+//                 for (const key of Object.keys(parsedResult)) {
+//                     if(parsedResult[key].authorised.includes(req.session.username) || req.session.username.toLowerCase() == settings.Settings.domainUsername.toLowerCase()) { } else { delete parsedResult[key]; }
+//                 }
                 result = JSON.stringify(parsedResult);
                 res.send(result);
               }
