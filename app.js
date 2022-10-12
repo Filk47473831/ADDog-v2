@@ -1127,6 +1127,7 @@ lookupUser(username,function(user) {
 
 function addUserToGroup(username,groupname,ret) {
 
+  console.log("add user to group: " + username + ", " + groupname)
 lookupUser(username,function(user) {
     if(user == null) {
       ret("No results for lookup")
@@ -1135,7 +1136,7 @@ lookupUser(username,function(user) {
 
       lookupGroup(groupname,function(group) {
           if(group == null) {
-            ret("No results for lookup")
+            ret("No results for lookup: " + groupname)
           } else {
             groupDn = group.dn;
 
@@ -1200,13 +1201,13 @@ function lookupUser(req,ret) {
 
 function lookupGroup(req,ret) {
 
+  console.log(req)
+  
   var opts = {
     filter: "(&(objectClass=group)(sAMAccountName=" + req + "))",
     scope: "sub",
     client: "*"
   }
-  
-  console.log(req)
 
   try {
     client.search(settings.Settings.baseDn, opts, function(err, res) {
