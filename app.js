@@ -1138,12 +1138,13 @@ function addUserToGroup(username,groupname,ret) {
 	  } else {
 		logError(result);
 		logError("Successfully modified group (" + groupname + ")"); ret("Success"); }
-	  }
+	  })
                     
 	} catch(err) {
         logError(err);
         ret(null);
-      }
+	}
+
 }
 
 function lookupUser(req,ret) {
