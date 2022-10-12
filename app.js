@@ -1128,42 +1128,23 @@ lookupUser(username,function(user) {
 function addUserToGroup(username,groupname,ret) {
 
   logError("add user to group: " + username + ", " + groupname)
-lookupUser(username,function(user) {
-    if(user == null) {
-      ret("No results for lookup")
-    } else {
-      userDn = user.dn;
-
-      lookupGroup(groupname,function(group) {
-          if(group == null) {
-            ret("No results for lookup: " + groupname)
-          } else {
-            groupDn = group.dn;
-
-        var change = new ldap.Change({
-          operation: 'add',
-          modification: {
-          member: [userDn]
-          }
-        });
-
-try {
-      client.modify(groupDn, change, function(err) {
-        if(err != null) { logError("Error modifying group: " + err); ret("Error modifying group: " + err); } else {
-          writeActivityLogFile("User Modified," + user.name + "," + loggedInUser);
-          logError("Successfully modified group (DN: " + groupDn + ")"); ret("Success"); }
-      })
-    } catch(err) {
+  
+  try {
+	
+	var cmd = `Add-ADGroupMember -Identity ${groupname} -Members ${username}`;
+	executePowershell(cmd,function(result) {
+	  if(result == null) {
+		logError('Error modifying group');
+	  } else {
+		logError(result);
+		logError("Successfully modified group (" + groupname + ")"); ret("Success"); }
+	  }
+                    
+	} catch(err) {
         logError(err);
         ret(null);
       }
-
-    } })
-
-  }
-})
 }
-
 
 function lookupUser(req,ret) {
 
