@@ -1222,7 +1222,8 @@ function lookupGroup(req,ret) {
     });
     res.on('end', function(result) {
       if(results.length == 0) {
-        logError('No results for group lookup');
+        console.log(req)
+        logError('No results for group lookup: ' + req);
         ret(null);
       }
     })
