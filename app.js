@@ -1127,7 +1127,7 @@ lookupUser(username,function(user) {
 
 function addUserToGroup(username,groupname,ret) {
 
-  console.log("add user to group: " + username + ", " + groupname)
+  logError("add user to group: " + username + ", " + groupname)
 lookupUser(username,function(user) {
     if(user == null) {
       ret("No results for lookup")
@@ -1201,7 +1201,7 @@ function lookupUser(req,ret) {
 
 function lookupGroup(req,ret) {
 
-  console.log(req)
+  logError(req)
   
   var opts = {
     filter: "(&(objectClass=group)(sAMAccountName=" + req + "))",
@@ -1223,7 +1223,6 @@ function lookupGroup(req,ret) {
     });
     res.on('end', function(result) {
       if(results.length == 0) {
-        console.log(req)
         logError('No results for group lookup: ' + req);
         ret(null);
       }
