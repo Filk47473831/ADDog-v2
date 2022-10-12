@@ -1205,6 +1205,8 @@ function lookupGroup(req,ret) {
     scope: "sub",
     client: "*"
   }
+  
+  console.log(req)
 
   try {
     client.search(settings.Settings.baseDn, opts, function(err, res) {
