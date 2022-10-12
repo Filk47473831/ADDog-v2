@@ -1204,7 +1204,7 @@ function lookupGroup(req,ret) {
   logError(req)
   
   var opts = {
-    filter: "(&(objectClass=group)(sAMAccountName=" + req + "))",
+    filter: "(&(objectClass=group)(cn=" + req + "*))",
     scope: "sub",
     client: "*"
   }
