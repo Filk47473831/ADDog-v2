@@ -1,5 +1,20 @@
 {
   "name": "AD Dog",
-  "version": "2.0.0",
-  "author": "Chris Groves"
+  "version": "02.00.00.00",
+  "description": "AD Dog Active Directory Management",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Chris Groves",
+  "dependencies": {
+    "express": "*",
+    "expression-session": "*",
+    "https": "*",
+    "body-parser": "*",
+    "express-handlebars": "*",
+    "keytar": "*",
+    "ldapjs": "*",
+    "node-powershell": "*"
+  }
 }
