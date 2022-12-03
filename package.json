@@ -9,7 +9,7 @@
   "author": "Chris Groves",
   "dependencies": {
     "express": "*",
-    "expression-session": "*",
+    "express-session": "*",
     "https": "*",
     "body-parser": "*",
     "express-handlebars": "*",
